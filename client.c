@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define BUFF_SIZE 1024
 
@@ -27,33 +28,34 @@ int main(int argc, char** argv) {
   }
   
   /* Connecting */
-  struct sockaddr_in c_sockaddr_in;
-  c_sockaddr_in.sin_family = AF_INET;
-  struct in_addr s_addr;
-  if (inet_aton(argv[1], &s_addr) == 0) {
-    fprintf(stderr, "Invalid address\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  c_sockaddr_in.sin_addr = s_addr;
+  struct sockaddr_in serv_addr;
+  memset(&serv_addr, '0', sizeof (struct sockaddr_in));
+  serv_addr.sin_family = AF_INET;
+    /* Port */
   uint16_t port = (uint16_t) atoi(argv[2]); 
+  serv_addr.sin_port = htons(port);
+    /* Server address */
+  if (inet_pton(AF_INET, argv[1], &serv_addr.sin_addr) == -1) {
+    perror("Inet_pton");
+    exit(1);
+  }
 
-  int c = connect(sfd, (const struct sockaddr*) &c_sockaddr_in, sizeof (struct sockaddr_in));
+  int c = connect(sfd, (const struct sockaddr*) &serv_addr, sizeof (struct sockaddr_in));
   if (c == -1) {
     perror("Connect");
     exit(1);
   }
   
-  void* buf = (void*) malloc (BUFF_SIZE*sizeof(char));
-  ssize_t recv_out;
+  char* buff = (char*) malloc (BUFF_SIZE*sizeof(char));
   
-  strcpy(buf, argv[3]);
-  recv_out = send(sfd, buf, BUFF_SIZE, 0);
-  recv_out = recv(sfd, buf, BUFF_SIZE, 0);
+  strcpy(buff, argv[3]);
+  printf("%s\n", buff);
+  send(sfd, buff, BUFF_SIZE, 0);
+  recv(sfd, buff, BUFF_SIZE, 0);
   
-  printf("%s", (char*) buf);
+  printf("%s", buff);
   
-  free(buf);
+  free(buff);
   
   return 0;
 }

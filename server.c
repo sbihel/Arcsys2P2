@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define BUFF_SIZE 1024
 
@@ -27,10 +28,12 @@ int main(int argc, char** argv) {
   
   /* Binding */
   struct sockaddr_in s_sockaddr_in, client_addr;
+  memset(&s_sockaddr_in, '0', sizeof (struct sockaddr_in));
+  memset(&client_addr, '0', sizeof (struct sockaddr_in));
   s_sockaddr_in.sin_family = AF_INET;
-  s_sockaddr_in.sin_addr.s_addr = INADDR_ANY;
+  s_sockaddr_in.sin_addr.s_addr = htonl(INADDR_ANY);
   uint16_t port = (uint16_t) atoi(argv[1]);
-  s_sockaddr_in.sin_port = htonl(port);
+  s_sockaddr_in.sin_port = htons(port);
   
   int b = bind(sfd, (const struct sockaddr*) &s_sockaddr_in, sizeof (struct sockaddr_in));
   if (b == -1) {
@@ -39,7 +42,7 @@ int main(int argc, char** argv) {
   } 
   
   /* Listening */
-  int l = listen(sfd, 128);
+  int l = listen(sfd, 10);
   if (l == -1) {
     perror("Listen");
     exit(1);
@@ -48,15 +51,12 @@ int main(int argc, char** argv) {
   
   /* Accept loop */
   struct in_addr addr;
-  void* buf = (void*) malloc (BUFF_SIZE*sizeof(char));
-  ssize_t recv_out;
+  char* buff = (char*) malloc (BUFF_SIZE*sizeof(char));
+  int clientfd;
+  socklen_t client_addr_len = sizeof(struct sockaddr_in);
   
   while (1) {
     
-    printf("waiting\n");
-    
-    int clientfd;
-    socklen_t client_addr_len = sizeof(struct sockaddr_in);
     clientfd = accept(sfd, (struct sockaddr *) &client_addr, &client_addr_len);
     
     if (clientfd == -1) {
@@ -72,13 +72,14 @@ int main(int argc, char** argv) {
 
     printf("%s\n", inet_ntoa(addr));
     
-    recv_out = recv(sfd, buf, BUFF_SIZE, 0);
-    recv_out = send(sfd, buf, BUFF_SIZE, 0);
+    recv(clientfd, buff, BUFF_SIZE, 0);
+    printf("%s\n", buff);
+    send(clientfd, buff, BUFF_SIZE, 0);
     
     close(clientfd);
   }
   
-  free(buf);
+  free(buff);
   
   return 0;
 }

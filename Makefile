@@ -1,14 +1,14 @@
-.PHONY: all client serveur
+.PHONY: all client server
 
 CC = gcc
-EXEC = serveur client
+EXEC = server client
 
-all: client serveur
+all: client server
 
 client:
 	$(CC) -g -o $@ $@.c
 
-serveur:
+server:
 	$(CC) -g -o $@ $@.c
 		
 clean:
