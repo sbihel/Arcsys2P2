@@ -1,0 +1,78 @@
+\documentclass[a4paper]{article}
+
+\usepackage[francais]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc} 
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{xspace}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage{hyperref}
+
+%% Tikz for picture drawing %%
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\usepackage{xcolor,colortbl}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{subfloat}
+
+\graphicspath{{figures/}}
+
+\providecommand{\resume}[1]{\textbf{\textit{Résumé---#1}}}
+\providecommand{\keywords}[1]{\textbf{\textit{Mots-clés---#1}}}
+
+\newcommand{\TODO}{\textcolor{red}{\textbf{TODO}}}
+\newcommand{\AB}{\emph{Alpha-Bêta}}
+
+\newcommand\q[1]{%(question~#1)}
+}
+\newcommand\qs[1]{%(questions~#1)}
+}
+\newcommand\C[1]{\texttt{#1}}
+
+
+\begin{document}
+
+
+\title{ARCSYS2 Projet 2%
+	\\ Communiquer et jouer en réseau}
+\author{Simon Bihel, Florestan De Moor%
+	 \\ ENS Rennes, 1ère année Département Informatique et Télécommunications}
+\date{05 Avril 2016}
+
+\maketitle
+
+\resume{\TODO}\\
+
+\keywords{\TODO}
+
+\section*{Introduction}
+
+
+Nous avons dans un projet précédent programmé un jeu des 7 couleurs en langage \texttt{C}, permettant à des joueurs humains et des joueurs artificiels de s'affronter. Nous avions pour cela implémenté différentes stratégies utilisables par des intelligence artificielle, et nous avions comparé leurs efficacités à travers un tournoi. \\
+
+Mais tel que nous l'avons implémenté, si deux joueurs humains veulent jouer, ils doit le faire sur la même machine. Si un tiers veut regarder la partie en tant que spectateur, il doit être physiquement présent devant l'écran de la machine sur laquelle tourne le jeu. Ceci est peu pratique, et ne permet pas une diffusion à large échelle des informations. \\
+
+C'est pourquoi nous allons à travers ce projet modifier notre code source afin de le rendre compatible à une utilisation par un réseau. Le but est de faire tourner le jeu sur un serveur, et d'avoir des clients qui peuvent se connecter au serveur soit pour jouer, soit pour assister au match, et éventuellement le retransmettre. \\
+
+\TODO annonce étapes démarche, mais faut coder avant ;)
+
+
+
+\section*{Conclusion}
+
+\TODO
+
+
+\bibliographystyle{plain} 
+\bibliography{report_arcsys2p2}
+
+\end{document}
