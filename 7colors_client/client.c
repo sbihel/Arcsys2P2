@@ -58,9 +58,9 @@ int init_client() {
  * buff needs to be freed when not used anymore
  */
 char* get_initial_board() {
-  char* buff = (char*) malloc (BUFF_SIZE*sizeof(char));
-  recv(sfd, buff, BUFF_SIZE, 0);
-  return buff;
+  char* game_infos = (char*) malloc (BUFF_SIZE*sizeof(char));
+  recv(sfd, game_infos, BUFF_SIZE, 0);
+  return game_infos;
 }
 
 /** Receive and return the next move (char) to play in the same
@@ -70,3 +70,11 @@ char get_next_move() {
   recv(sfd, &c, 1, 0);
   return c;
 }
+
+/** Init game by parsing the game_infos received from server
+ */
+void init_game_server(char* game_infos) {
+   
+  }
+
+
