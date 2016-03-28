@@ -9,16 +9,12 @@
 #include <errno.h>
 
 #define BUFF_SIZE 1024
+#define PORT_NB "7777"
+#define NB_VIEWERS 1
+int viewers[NB_VIEWERS];
 
 
-int main(int argc, char** argv) {
-
-  /* Checking number of arguments */
-   if (argc != 2) {
-    printf("Invalid argument\n");
-    exit(1);
-  }
-
+int init_server() {
   /* Opening socket */
   int sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (sfd == -1) {
@@ -32,7 +28,7 @@ int main(int argc, char** argv) {
   memset(&client_addr, '0', sizeof (struct sockaddr_in));
   s_sockaddr_in.sin_family = AF_INET;
   s_sockaddr_in.sin_addr.s_addr = htonl(INADDR_ANY);
-  uint16_t port = (uint16_t) atoi(argv[1]);
+  uint16_t port = (uint16_t) atoi(PORT_NB);
   s_sockaddr_in.sin_port = htons(port);
 
   int b = bind(sfd, (const struct sockaddr*) &s_sockaddr_in, sizeof (struct
@@ -52,12 +48,11 @@ int main(int argc, char** argv) {
 
   /* Accept loop */
   struct in_addr addr;
-  char* buff = (char*) malloc (BUFF_SIZE*sizeof(char));
+  /*char* buff = (char*) malloc (BUFF_SIZE*sizeof(char));*/
   int clientfd;
   socklen_t client_addr_len = sizeof(struct sockaddr_in);
 
-  while (1) {
-
+  if (1) {
     clientfd = accept(sfd, (struct sockaddr *) &client_addr, &client_addr_len);
 
     if (clientfd == -1) {
@@ -66,21 +61,39 @@ int main(int argc, char** argv) {
     }
 
     addr = client_addr.sin_addr;
-    if (inet_aton(argv[1], &addr) == 0) {
+    if (inet_aton(PORT_NB, &addr) == 0) {
       fprintf(stderr, "Invalid address\n");
       exit(EXIT_FAILURE);
     }
 
     printf("%s\n", inet_ntoa(addr));
 
-    recv(clientfd, buff, BUFF_SIZE, 0);
-    printf("%s\n", buff);
-    send(clientfd, buff, BUFF_SIZE, 0);
+    /*recv(clientfd, buff, BUFF_SIZE, 0);*/
+    /*printf("%s\n", buff);*/
+    /*send(clientfd, buff, BUFF_SIZE, 0);*/
+    viewers[0] = clientfd;
 
-    close(clientfd);
+    /*close(clientfd);*/
   }
 
-  free(buff);
+  /*for(int i = 0; i < NB_VIEWERS; i++) {*/
+    /*close(viewers[i]);*/
+    /*viewers[i] = 0;*/
+  /*}*/
+
+  /*free(buff);*/
 
   return 0;
+}
+
+void close_server() {
+  for(int i = 0; i < NB_VIEWERS; i++)
+    close(viewers[i]);
+}
+
+
+int update_viewers(char *message, int size_message) {
+  for(int i = 0; i < NB_VIEWERS; i++) {
+    send(viewers[i], message, size_message, 0);
+  }
 }
