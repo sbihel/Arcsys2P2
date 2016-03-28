@@ -92,7 +92,9 @@ void close_server() {
 }
 
 
-/** Send a message with the board, it's size and the symbols of both players
+/**
+ * Send a message with the board's size, the board and the symbols of both
+ * players
  */
 void init_viewers(char *board, int board_size, char symbol_0, char symbol_1){
   char size_string[40];
@@ -100,13 +102,14 @@ void init_viewers(char *board, int board_size, char symbol_0, char symbol_1){
   char *message = malloc((board_size * board_size + 50) * sizeof(char));
 
   int j;
-  for(j = 0; j < board_size * board_size; j++)
-    message[j] = board[j];
-  j++;
+  while(size_string[j] != '\0') {
+    message[j] = size_string[j];
+    j++;
+  }
   message[j] = ' ';
   j++;
-  while(size_string[j-board_size-1] != '\0') {
-    message[j] = size_string[j-board_size-1];
+  for(int k = 0; k < board_size * board_size; k++) {
+    message[j] = board[k];
     j++;
   }
   message[j] = ' ';
