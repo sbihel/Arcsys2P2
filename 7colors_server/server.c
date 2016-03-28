@@ -120,7 +120,7 @@ void init_viewers(char *board, int board_size, char symbol_0, char symbol_1){
 }
 
 
-int update_viewers(char *message, int size_message) {
+void update_viewers(char *message, int size_message) {
   for(int i = 0; i < NB_VIEWERS; i++) {
     send(viewers[i], message, size_message, 0);
   }
