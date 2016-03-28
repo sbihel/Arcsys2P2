@@ -5,6 +5,7 @@
 #include "7colors.h"
 #include "ai.h"
 #include <unistd.h>
+#include "server.h"
 
 bool is_game_finished(int*);
 char ask(int);

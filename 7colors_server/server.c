@@ -92,6 +92,34 @@ void close_server() {
 }
 
 
+/** Send a message with the board, it's size and the symbols of both players
+ */
+void init_viewers(char *board, int board_size, char symbol_0, char symbol_1){
+  char *message = malloc((board_size + 20) * sizeof(char));
+  int j;
+  for(j = 0; j < board_size * board_size; j++)
+    message[j] = board[j];
+  j++;
+  char size_string[15];
+  sprintf(size_string, "%d", board_size);
+  j++;
+  while(size_string[j-board_size-1] != '\0') {
+    message[j] = size_string[j-board_size-1];
+    j++;
+  }
+  message[j] = ' ';
+  message[++j] = symbol_0;
+  message[++j] = ' ';
+  message[++j] = symbol_1;
+  message[++j] = '\0';
+
+  for(int i = 0; i < NB_VIEWERS; i++) {
+    send(viewers[i], message, (board_size + 10) * sizeof(char), 0);
+  }
+  free(message);
+}
+
+
 int update_viewers(char *message, int size_message) {
   for(int i = 0; i < NB_VIEWERS; i++) {
     send(viewers[i], message, size_message, 0);
