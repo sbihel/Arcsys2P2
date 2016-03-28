@@ -1,6 +1,6 @@
 OBJECTS=7colors.o main.o game.o ai.o server.o
 EXECUTABLE=7colors
-CFLAGS=-Wall -Werror -Wextra -O3
+CFLAGS=-Wall -Werror -Wextra -O3 -std=gnu99
 
 all: $(EXECUTABLE)
 
