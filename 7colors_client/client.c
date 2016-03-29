@@ -60,11 +60,14 @@ char* get_initial_board() {
   return game_infos;
 }
 
-/** Receive from server and return the next move (char) to play in the same
+/** Receive from server and return a char[2]
+ * c[0] in the next move to play
+ * c[1] is the player that plays it
+ * c needs to be freed after use
  */
-char get_next_move() {
-  char c;
-  recv(sfd, &c, 1, 0);
+char* get_next_move() {
+  char* c = (char*) malloc (2*sizeof(char));
+  recv(sfd, c, 2, 0);
   return c;
 }
 
@@ -92,8 +95,6 @@ void init_spectate() {
     board[j-i] = game_infos[j];
   }
   
-  char curPlayer = game_infos[++j];
-  
   if (game_infos[++j] != '\0') {
     printf("Error parsing infos from server\n");
     exit(1);
@@ -102,7 +103,7 @@ void init_spectate() {
   free(game_infos);
   
   /* Play the game from current state */
-  game_spectate(board, curPlayer);
+  game_spectate(board);
   
   free(board);
 }

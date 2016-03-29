@@ -10,6 +10,6 @@
 bool is_game_finished(int*);
 char ask(int);
 void ask_game_type(char* game_types, int* depths, char player_id);
-char game_spectate(char* board, char curPlayer);
+char game_spectate(char* board);
 
 #endif

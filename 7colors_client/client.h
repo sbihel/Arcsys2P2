@@ -3,7 +3,7 @@
 
 int init_client();
 char* get_initial_board();
-char get_next_move();
+char* get_next_move();
 void init_spectate();
 
 #endif
