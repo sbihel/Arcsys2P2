@@ -44,20 +44,13 @@ int init_client() {
     exit(1);
   }
 
-  send(sfd, buff, BUFF_SIZE, 0);
-  recv(sfd, buff, BUFF_SIZE, 0);
-
-  printf("%s", buff);
-
-  free(buff);
-
   return 0;
 }
 
 /** Receive the board description as given by init_viewers and return it
  * buff needs to be freed when not used anymore
  */
-char* get_initial_board() {
+char* get_initial_board() {
   char* game_infos = (char*) malloc (BUFF_SIZE*sizeof(char));
   recv(sfd, game_infos, BUFF_SIZE, 0);
   return game_infos;
@@ -74,7 +67,44 @@ char get_next_move() {
 /** Init game by parsing the game_infos received from server
  */
 void init_game_server(char* game_infos) {
-   
+  
+  /* Parsing game_infos */
+  
+  char size_string[40];
+  int j = 0;
+  while (game_infos[j] != ' ') {
+    size_string[j] = game_infos[j];
+    j++;
   }
+  j++
+  int board_size = atoi(size_string);
+  
+  char* board = (char*) malloc (board_size * board_size * sizeof(char));
+  int i = j;
+  for ( ; j < i + board_size * board_size; j++) {
+    board[j-i] = game_infos[j];
+  }
+  
+  char symbol_0 = game_infos[++j];
+  j++;
+  char symbol_1 = game_infos[++j];
+  
+  if (game_infos[+jj] != '\0') {
+    printf("Error parsing infos from server\n");
+    exit(1);
+  }
+  
+  free(game_infos);
+  
+  return board;
+}
+
+void spectate() {
+  init_client();
+  char* game_infos = get_initial_board();
+  char* board = init_game_server(game_infos);
+  game_spectate(board);
+  free(board);
+}
 
 

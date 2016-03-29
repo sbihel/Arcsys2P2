@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "game.h"
 #include <stdlib.h>
-#include "server.h"
+#include "client.h"
 
 
 /** Program entry point */
@@ -16,7 +16,7 @@ int main()
       "  *****************************************************\n\n");
 
   // Play the game !
-  init_server();
+  spectate();
   init_game();
 
   return 0; // Everything went well

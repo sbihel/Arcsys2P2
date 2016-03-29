@@ -32,7 +32,6 @@ void init_game()
     char* board = malloc(BOARD_SIZE * BOARD_SIZE);
     symmetric_fill_board(board);
     game(board, depths, game_types);
-    init_viewers(board, BOARD_SIZE, SYMBOL_0, SYMBOL_1);
   }
 }
 
@@ -177,7 +176,6 @@ char game(char* board, int* depths, char* game_types)
     nb_cells[(int) curPlayer] += update_board(board,
         (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
     print_board(board);
-    update_viewers(&nextColor, 1);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
@@ -194,6 +192,43 @@ char game(char* board, int* depths, char* game_types)
   return curPlayer;
 }
 
+
+char game_spectate(char* board)
+{
+  char curPlayer = 0;
+  bool isFinished = false;
+  int nb_cells[2] = {1, 1};
+
+  printf("\033[2J");  // clear screen
+  print_board(board);
+  printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
+      (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+      (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+
+  while(!isFinished)
+  {
+    char nextColor = 'A';
+    nextColor = get_next_move();
+    nb_cells[(int) curPlayer] += update_board(board,
+        (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
+    print_board(board);
+
+    printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
+        (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+        (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+    if(is_game_finished(nb_cells)) {
+      printf("\033[KPlayer %d won with an occupation rate of %.2f%%\n",
+          curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
+            * BOARD_SIZE));
+      break;
+    }
+    curPlayer = (curPlayer + 1) % 2;
+
+  }
+  return curPlayer;
+}
+
+
 /** Run a tournament then show statistics. Running a tournament is
  * reinitializing the board after each game, and counting the score.
  * @param depths The depths to which alphabetas and minimaxes will go to.
@@ -209,7 +244,6 @@ void tournament(char* game_types, int* depths, int nb_games)
   int i;
   for(i = 0; i < nb_games; i++) {
     symmetric_fill_board(board); // ensure equality between the contestants
-    init_viewers(board, BOARD_SIZE, SYMBOL_0, SYMBOL_1);
     char winner = game(board, depths, game_types);
     res[(int)winner]++;
   }
