@@ -16,6 +16,9 @@
 
 int sfd;
 
+
+/** Open a client socket
+ */
 int init_client() {
 
   /* Opening socket */
@@ -49,7 +52,7 @@ int init_client() {
 }
 
 /** Receive the board description as given by init_viewers and return it
- * buff needs to be freed when not used anymore
+ * game_infos needs to be freed when not used anymore
  */
 char* get_initial_board() {
   char* game_infos = (char*) malloc (BUFF_SIZE*sizeof(char));
@@ -57,7 +60,7 @@ char* get_initial_board() {
   return game_infos;
 }
 
-/** Receive and return the next move (char) to play in the same
+/** Receive from server and return the next move (char) to play in the same
  */
 char get_next_move() {
   char c;

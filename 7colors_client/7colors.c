@@ -143,7 +143,9 @@ int update_board(char* board, char player, char color) {
 
 
 /** Returns scores of type int[2], score of the two players
- * scores must be freed after use
+ * according to current state of board
+ * @param board The board.
+ * Scores must be freed after use
  */
 int* get_current_score(char* board) {
   int i, j;
