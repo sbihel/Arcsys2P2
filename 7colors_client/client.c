@@ -70,7 +70,7 @@ char get_next_move() {
 char* init_game_server(char* game_infos) {
   
   /* Parsing game_infos */
-  
+  printf("%s\n", game_infos);
   char size_string[40];
   int j = 0;
   while (game_infos[j] != ' ') {
