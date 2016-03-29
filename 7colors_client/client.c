@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include "game.h"
 
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
@@ -66,7 +67,7 @@ char get_next_move() {
 
 /** Init game by parsing the game_infos received from server
  */
-void init_game_server(char* game_infos) {
+char* init_game_server(char* game_infos) {
   
   /* Parsing game_infos */
   
@@ -76,7 +77,7 @@ void init_game_server(char* game_infos) {
     size_string[j] = game_infos[j];
     j++;
   }
-  j++
+  j++;
   int board_size = atoi(size_string);
   
   char* board = (char*) malloc (board_size * board_size * sizeof(char));
@@ -89,7 +90,7 @@ void init_game_server(char* game_infos) {
   j++;
   char symbol_1 = game_infos[++j];
   
-  if (game_infos[+jj] != '\0') {
+  if (game_infos[++j] != '\0') {
     printf("Error parsing infos from server\n");
     exit(1);
   }
