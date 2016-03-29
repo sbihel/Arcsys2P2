@@ -18,6 +18,7 @@ int main()
   // Play the game !
   init_server();
   init_game();
+  close_server();
 
   return 0; // Everything went well
 }

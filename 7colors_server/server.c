@@ -52,6 +52,10 @@ int init_server() {
   int clientfd;
   socklen_t client_addr_len = sizeof(struct sockaddr_in);
 
+  for(int i = 0; i < NB_VIEWERS; i++)
+    viewers[i] = 0;
+  // TODO work with multiple viewers
+
   if (1) {
     clientfd = accept(sfd, (struct sockaddr *) &client_addr, &client_addr_len);
 
@@ -89,6 +93,7 @@ int init_server() {
 void close_server() {
   for(int i = 0; i < NB_VIEWERS; i++)
     close(viewers[i]);
+  // TODO graceful shutdown
 }
 
 
@@ -96,7 +101,7 @@ void close_server() {
  * Send a message with the board's size, the board and the symbols of both
  * players
  */
-void init_viewers(char *board, int board_size, char symbol_0, char symbol_1){
+void init_viewers(char *board, int board_size, char current_player){
   char size_string[40];
   sprintf(size_string, "%d", board_size);
   char *message = malloc((board_size * board_size + 50) * sizeof(char));
@@ -114,9 +119,7 @@ void init_viewers(char *board, int board_size, char symbol_0, char symbol_1){
     j++;
   }
   message[j] = ' ';
-  message[++j] = symbol_0;
-  message[++j] = ' ';
-  message[++j] = symbol_1;
+  message[++j] = current_player;
   message[++j] = '\0';
 
   for(int i = 0; i < NB_VIEWERS; i++) {
