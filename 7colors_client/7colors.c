@@ -141,3 +141,27 @@ int update_board(char* board, char player, char color) {
   return nb_cell_acquired;
 }
 
+
+/** Returns scores of type int[2], score of the two players
+ * scores must be freed after use
+ */
+int* get_current_score(char* board) {
+  int i, j;
+  int* scores = (int*) malloc (2*sizeof(int));
+  for (i = 0; i < BOARD_SIZE; i++) {
+    for (j = 0; j < BOARD_SIZE; j++) {
+      switch (get_cell(board, i, j)) {
+        case SYMBOL_0:
+          scores[0]++;
+          break
+        case SYMBOL_1:
+          scores[1]++;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  return scores;
+}
+

@@ -193,11 +193,12 @@ char game(char* board, int* depths, char* game_types)
 }
 
 
-char game_spectate(char* board)
+char game_spectate(char* board, char curPlayer)
 {
-  char curPlayer = 0;
   bool isFinished = false;
-  int nb_cells[2] = {1, 1};
+  int* scores = get_current_score(board);
+  int nb_cells[2] = {scores[0], scores[1]};
+  free(scores);
 
   printf("\033[2J");  // clear screen
   print_board(board);

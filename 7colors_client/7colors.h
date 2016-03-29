@@ -21,6 +21,6 @@ void fill_board(char* board);
 void symmetric_fill_board(char* board);
 bool is_adjacent(char* board, int i, int j, char player);
 int update_board(char* board, char player, char color);
-unsigned int board_checksum(char* board);
+int* get_current_score(char* board);
 
 #endif

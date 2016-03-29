@@ -67,7 +67,12 @@ char get_next_move() {
 
 /** Init game by parsing the game_infos received from server
  */
-char* init_game_server(char* game_infos) {
+void init_spectate() {
+  
+  /* Getting infos from server */
+  init_client();
+  char* game_infos = get_initial_board();
+  char* game_infos = get_initial_board();
   
   /* Parsing game_infos */
   printf("%s\n", game_infos);
@@ -86,9 +91,7 @@ char* init_game_server(char* game_infos) {
     board[j-i] = game_infos[j];
   }
   
-  char symbol_0 = game_infos[++j];
-  j++;
-  char symbol_1 = game_infos[++j];
+  char curPlayer = game_infos[++j];
   
   if (game_infos[++j] != '\0') {
     printf("Error parsing infos from server\n");
@@ -97,14 +100,9 @@ char* init_game_server(char* game_infos) {
   
   free(game_infos);
   
-  return board;
-}
-
-void spectate() {
-  init_client();
-  char* game_infos = get_initial_board();
-  char* board = init_game_server(game_infos);
-  game_spectate(board);
+  /* Play the game from current state */
+  game_spectate(board, curPlayer);
+  
   free(board);
 }
 
