@@ -74,7 +74,6 @@ void init_spectate() {
   char* game_infos = get_initial_board();
   
   /* Parsing game_infos */
-  printf("%s\n", game_infos);
   char size_string[40];
   int j = 0;
   while (game_infos[j] != ' ') {

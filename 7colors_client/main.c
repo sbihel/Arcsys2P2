@@ -17,7 +17,6 @@ int main()
 
   // Play the game !
   init_spectate();
-  init_game();
 
   return 0; // Everything went well
 }

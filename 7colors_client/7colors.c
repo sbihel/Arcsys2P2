@@ -148,6 +148,8 @@ int update_board(char* board, char player, char color) {
 int* get_current_score(char* board) {
   int i, j;
   int* scores = (int*) malloc (2*sizeof(int));
+  scores[0] = 0;
+  scores[1] = 0;
   for (i = 0; i < BOARD_SIZE; i++) {
     for (j = 0; j < BOARD_SIZE; j++) {
       switch (get_cell(board, i, j)) {
@@ -162,6 +164,7 @@ int* get_current_score(char* board) {
       }
     }
   }
+  printf("%d %d\n", scores[0], scores[1]);
   return scores;
 }
 
