@@ -31,8 +31,8 @@ void init_game()
     // ensure equality between the contestants
     char* board = malloc(BOARD_SIZE * BOARD_SIZE);
     symmetric_fill_board(board);
-    game(board, depths, game_types);
     init_viewers(board, BOARD_SIZE, SYMBOL_0, SYMBOL_1);
+    game(board, depths, game_types);
   }
 }
 

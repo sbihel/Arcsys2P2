@@ -102,6 +102,7 @@ void init_viewers(char *board, int board_size, char symbol_0, char symbol_1){
   char *message = malloc((board_size * board_size + 50) * sizeof(char));
 
   int j;
+  j = 0;
   while(size_string[j] != '\0') {
     message[j] = size_string[j];
     j++;
