@@ -72,7 +72,6 @@ void init_spectate() {
   /* Getting infos from server */
   init_client();
   char* game_infos = get_initial_board();
-  char* game_infos = get_initial_board();
   
   /* Parsing game_infos */
   printf("%s\n", game_infos);

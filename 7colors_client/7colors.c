@@ -153,7 +153,7 @@ int* get_current_score(char* board) {
       switch (get_cell(board, i, j)) {
         case SYMBOL_0:
           scores[0]++;
-          break
+          break;
         case SYMBOL_1:
           scores[1]++;
           break;
