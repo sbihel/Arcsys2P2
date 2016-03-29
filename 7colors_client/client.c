@@ -14,6 +14,8 @@
 #define PORT_NB "7777"
 #define SERVER_IP "127.0.0.1"
 
+#define MOVE_REQUEST "ceciestunerequetedemove"
+
 int sfd;
 
 
@@ -70,6 +72,25 @@ char* get_next_move() {
   recv(sfd, c, 2, 0);
   return c;
 }
+
+
+/** Receive messages from server, and when a move reques is detected,
+ * send the move
+ * @param move : next move to play
+ */
+void send_next_move(char move) {
+  char move_request[BUFF_SIZE];
+  sprintf(move_request, MOVE_REQUEST);
+  char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
+  sprintf(buffer, "\0");
+  do {
+    recv(sfd, buffer, BUFF_SIZE, 0);
+  } while (!strcmp(buffer, move_request));
+  buffer[0] = move;
+  buffer[1] = " ";
+  send(sfr, buffer, BUFF_SIZE, 0);
+  free(buffer);
+  }
 
 /** Init game by parsing the game_infos received from server
  */
