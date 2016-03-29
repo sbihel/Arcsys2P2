@@ -10,11 +10,14 @@
 
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
-#define NB_VIEWERS 1
+#define NB_VIEWERS 999
 int viewers[NB_VIEWERS];
 
 
 int init_server() {
+  for(int i = 0; i < NB_VIEWERS; i++)
+    viewers[i] = 0;
+
   /* Opening socket */
   int sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (sfd == -1) {
@@ -52,11 +55,10 @@ int init_server() {
   int clientfd;
   socklen_t client_addr_len = sizeof(struct sockaddr_in);
 
-  for(int i = 0; i < NB_VIEWERS; i++)
-    viewers[i] = 0;
   // TODO work with multiple viewers
 
-  if (1) {
+  while(!viewers[NB_VIEWERS-1]) {
+    // TODO set accept timeout (use select)
     clientfd = accept(sfd, (struct sockaddr *) &client_addr, &client_addr_len);
 
     if (clientfd == -1) {
