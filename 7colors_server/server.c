@@ -120,8 +120,7 @@ void init_viewers(char *board, int board_size, char current_player){
     message[j] = board[k];
     j++;
   }
-  message[j] = ' ';
-  message[++j] = current_player;
+  
   message[++j] = '\0';
 
   for(int i = 0; i < NB_VIEWERS; i++) {

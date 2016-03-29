@@ -69,22 +69,8 @@ char ask(int curPlayer)
  * @param curPlayer_ the current player in the game when server
  * received spectating request
  */
-char game_spectate(char* board, char curPlayer_)
+char game_spectate(char* board)
 {
-  
-  /* Set the right current player */
-  char curPlayer;
-  switch (curPlayer_) {
-    case SYMBOL_0:
-      curPlayer = 0;
-      break;
-    case SYMBOL_1:
-      curPlayer = 1;
-      break;
-    default:
-      curPlayer = 0;
-      break;
-  }
   
   /* Initialize scores according to the current state of the game */
   bool isFinished = false;
@@ -99,11 +85,12 @@ char game_spectate(char* board, char curPlayer_)
       (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
 
   while(!isFinished)
-  {
+  { 
+    char* c = get_next_move();
     char nextColor = 'A';
-    nextColor = get_next_move();
-    nb_cells[(int) curPlayer] += update_board(board,
-        (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
+    nextColor = c[0];
+    nb_cells[(int) c[1]] += update_board(board,
+        (c[1])?SYMBOL_1:SYMBOL_0, nextColor);
     print_board(board);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
@@ -111,12 +98,13 @@ char game_spectate(char* board, char curPlayer_)
         (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
     if(is_game_finished(nb_cells)) {
       printf("\033[KPlayer %d won with an occupation rate of %.2f%%\n",
-          curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
+          c[1], (double) 100.0 * nb_cells[(int) c[1]] / (BOARD_SIZE
             * BOARD_SIZE));
       break;
+      
+    free(c);
     }
-    curPlayer = (curPlayer + 1) % 2;
 
   }
-  return curPlayer;
+  return (char) 0;
 }

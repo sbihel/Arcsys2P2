@@ -177,7 +177,10 @@ char game(char* board, int* depths, char* game_types)
     nb_cells[(int) curPlayer] += update_board(board,
         (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
     print_board(board);
-    update_viewers(&nextColor, 1);
+    char message[2];
+    message[0] = nextColor;
+    message[1] = curPlayer;
+    update_viewers(message, 2);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
