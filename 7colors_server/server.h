@@ -3,7 +3,7 @@
 
 int init_server();
 void close_server();
-void init_viewers(char *board, int board_size, char symbol_0, char symbol_1);
+void init_viewers(char *board, int board_size, char current_player);
 int update_viewers(char *message, int size_message);
 
 #endif
