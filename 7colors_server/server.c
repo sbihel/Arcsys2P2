@@ -50,7 +50,6 @@ int init_server() {
   printf("server: waiting for connections...\n");
 
   /* Accept loop */
-  struct in_addr addr;
   int clientfd;
   socklen_t client_addr_len = sizeof(struct sockaddr_in);
 
@@ -75,13 +74,13 @@ int init_server() {
         exit(1);
       }
 
-      addr = client_addr.sin_addr;
-      if (inet_aton(PORT_NB, &addr) == 0) {
-        fprintf(stderr, "Invalid address\n");
-        exit(EXIT_FAILURE);
+      char client_addr_str[INET_ADDRSTRLEN];
+      if (!inet_ntop(AF_INET, &client_addr, client_addr_str, INET_ADDRSTRLEN)) {
+        perror("Address");
+        exit(1);
       }
 
-      printf("Accepted %s\n", inet_ntoa(addr));
+      printf("Accepted %s\n", client_addr_str);
       viewers[i_viewer] = clientfd;
 
       i_viewer++;
