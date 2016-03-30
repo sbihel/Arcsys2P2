@@ -51,43 +51,45 @@ int init_server() {
 
   /* Accept loop */
   struct in_addr addr;
-  /*char* buff = (char*) malloc (BUFF_SIZE*sizeof(char));*/
   int clientfd;
   socklen_t client_addr_len = sizeof(struct sockaddr_in);
 
-  // TODO work with multiple viewers
-
+  int i_viewer = 0;
   while(!viewers[NB_VIEWERS-1]) {
-    // TODO set accept timeout (use select)
-    clientfd = accept(sfd, (struct sockaddr *) &client_addr, &client_addr_len);
+    struct timeval tv;
+    fd_set readfds;
+    tv.tv_sec = 2;
+    tv.tv_usec = 500000;  // wait 2.5 seconds before timeout
 
-    if (clientfd == -1) {
-      perror("Accept");
-      exit(1);
+    FD_ZERO(&readfds);
+    FD_SET(sfd, &readfds);
+
+    int res_select = select(sfd+1, &readfds, NULL, NULL, &tv);
+
+    if(res_select) {
+      clientfd = accept(sfd, (struct sockaddr *) &client_addr,
+          &client_addr_len);
+
+      if (clientfd == -1) {
+        perror("Accept");
+        exit(1);
+      }
+
+      addr = client_addr.sin_addr;
+      if (inet_aton(PORT_NB, &addr) == 0) {
+        fprintf(stderr, "Invalid address\n");
+        exit(EXIT_FAILURE);
+      }
+
+      printf("Accepted %s\n", inet_ntoa(addr));
+      viewers[i_viewer] = clientfd;
+
+      i_viewer++;
+    } else {
+      printf("Initial wait is over, let's start.");
+      break;
     }
-
-    addr = client_addr.sin_addr;
-    if (inet_aton(PORT_NB, &addr) == 0) {
-      fprintf(stderr, "Invalid address\n");
-      exit(EXIT_FAILURE);
-    }
-
-    printf("%s\n", inet_ntoa(addr));
-
-    /*recv(clientfd, buff, BUFF_SIZE, 0);*/
-    /*printf("%s\n", buff);*/
-    /*send(clientfd, buff, BUFF_SIZE, 0);*/
-    viewers[0] = clientfd;
-
-    /*close(clientfd);*/
   }
-
-  /*for(int i = 0; i < NB_VIEWERS; i++) {*/
-    /*close(viewers[i]);*/
-    /*viewers[i] = 0;*/
-  /*}*/
-
-  /*free(buff);*/
 
   return 0;
 }
@@ -120,7 +122,7 @@ void init_viewers(char *board, int board_size, char current_player){
     message[j] = board[k];
     j++;
   }
-  
+  // TODO current_player is needed when the game has already started
   message[++j] = '\0';
 
   for(int i = 0; i < NB_VIEWERS; i++) {

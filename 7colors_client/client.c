@@ -88,18 +88,18 @@ void send_next_move(char move) {
   } while (!strcmp(buffer, move_request));
   buffer[0] = move;
   buffer[1] = " ";
-  send(sfr, buffer, BUFF_SIZE, 0);
+  send(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   }
 
 /** Init game by parsing the game_infos received from server
  */
 void init_spectate() {
-  
+
   /* Getting infos from server */
   init_client();
   char* game_infos = get_initial_board();
-  
+
   /* Parsing game_infos */
   char size_string[40];
   int j = 0;
@@ -109,23 +109,23 @@ void init_spectate() {
   }
   j++;
   int board_size = atoi(size_string);
-  
+
   char* board = (char*) malloc (board_size * board_size * sizeof(char));
   int i = j;
   for ( ; j < i + board_size * board_size; j++) {
     board[j-i] = game_infos[j];
   }
-  
+
   if (game_infos[++j] != '\0') {
     printf("Error parsing infos from server\n");
     exit(1);
   }
-  
+
   free(game_infos);
-  
+
   /* Play the game from current state */
   game_spectate(board);
-  
+
   free(board);
 }
 
