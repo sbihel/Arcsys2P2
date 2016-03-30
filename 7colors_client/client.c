@@ -15,6 +15,7 @@
 #define SERVER_IP "127.0.0.1"
 
 #define MOVE_REQUEST "ceciestunerequetedemove"
+#define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
 
 int sfd;
 
@@ -74,7 +75,7 @@ char* get_next_move() {
 }
 
 
-/** Receive messages from server, and when a move reques is detected,
+/** Receive messages from server, and when a move request is detected,
  * send the move
  * @param move : next move to play
  */
@@ -82,7 +83,7 @@ void send_next_move(char move) {
   char move_request[BUFF_SIZE];
   sprintf(move_request, MOVE_REQUEST);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  sprintf(buffer, "\0");
+  sprintf(buffer, " ");
   do {
     recv(sfd, buffer, BUFF_SIZE, 0);
   } while (!strcmp(buffer, move_request));
@@ -91,6 +92,26 @@ void send_next_move(char move) {
   send(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   }
+  
+
+/** Receive messages from server, and when a game_type request is detected,
+ * send the infos, same format as in ask_game_type_client
+ */
+void send_game_type_client() {
+  char player_request[BUFF_SIZE];
+  sprintf(player_request, PLAYER_REQUEST);
+  char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
+  sprintf(buffer, " ");
+  do {
+    recv(sfd, buffer, BUFF_SIZE, 0);
+  } while (!strcmp(buffer, player_request));
+  char* infos = ask_game_type_client();
+  sprintf(buffer, infos);
+  send(sfd, buffer, BUFF_SIZE, 0);
+  free(buffer);
+  free(infos);
+  }
+
 
 /** Init game by parsing the game_infos received from server
  */
