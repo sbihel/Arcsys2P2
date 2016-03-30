@@ -180,7 +180,7 @@ char game(char* board, int* depths, char* game_types)
     char message[2];
     message[0] = nextColor;
     message[1] = curPlayer;
-    update_viewers(message, 2);
+    update_viewers(message, 2, board, BOARD_SIZE);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),

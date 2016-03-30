@@ -65,6 +65,7 @@ int init_server() {
     FD_ZERO(&readfds);
     FD_SET(sfd, &readfds);
 
+    // Using select just to have a timeout
     int res_select = select(sfd+1, &readfds, NULL, NULL, &tv);
 
     if(res_select) {
@@ -104,11 +105,36 @@ void close_server() {
 }
 
 
+void init_viewer(char *board, int board_size, int index_viewer) {
+  char size_string[40];
+  sprintf(size_string, "%d", board_size);
+  char *message = malloc((board_size * board_size + 50) * sizeof(char));
+
+  int j;
+  j = 0;
+  while(size_string[j] != '\0') {
+    message[j] = size_string[j];
+    j++;
+  }
+  message[j] = ' ';
+  j++;
+  for(int k = 0; k < board_size * board_size; k++) {
+    message[j] = board[k];
+    j++;
+  }
+
+  message[++j] = '\0';
+
+  send(viewers[index_viewer], message, (board_size * board_size + 50) *
+      sizeof(char), 0);
+  free(message);
+}
+
+
 /**
- * Send a message with the board's size, the board and the symbols of both
- * players
+ * Send a message with the board's size and the board
  */
-void init_viewers(char *board, int board_size){
+void init_viewers(char *board, int board_size) {
   char size_string[40];
   sprintf(size_string, "%d", board_size);
   char *message = malloc((board_size * board_size + 50) * sizeof(char));
@@ -140,15 +166,20 @@ void remove_viewer(int index_viewer) {
   current_nb_viewers--;
 }
 
-void check_new_viewers() {
+void check_new_viewers(char *board, int board_size) {
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(sfd, &readfds);
-    int res_select = select(sfd+1, &readfds, NULL, NULL, NULL);
-    if(res_select) {
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;  // wait 2.5 seconds before timeout
+    if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
+      perror("select");
+      exit(1);
+    }
+    if(FD_ISSET(sfd, &readfds)) {
       struct sockaddr_in client_addr;
       memset(&client_addr, '0', sizeof (struct sockaddr_in));
-      struct in_addr addr;
       int clientfd;
       socklen_t client_addr_len = sizeof(struct sockaddr_in);
       clientfd = accept(sfd, (struct sockaddr *) &client_addr,
@@ -159,22 +190,24 @@ void check_new_viewers() {
         exit(1);
       }
 
-      addr = client_addr.sin_addr;
-      if (inet_aton(PORT_NB, &addr) == 0) {
-        fprintf(stderr, "Invalid address\n");
-        exit(EXIT_FAILURE);
+      char client_addr_str[INET_ADDRSTRLEN];
+      if (!inet_ntop(AF_INET, &client_addr, client_addr_str, INET_ADDRSTRLEN)) {
+        perror("Address");
+        exit(1);
       }
 
-      /*printf("Accepted %s\n", inet_ntoa(addr));*/
       viewers[current_nb_viewers] = clientfd;
-
+      init_viewer(board, board_size, current_nb_viewers);
+      // TODO init viewers
       current_nb_viewers++;
     }
 }
 
-void update_viewers(char *message, int size_message) {
-  /*check_new_viewers();*/
+void update_viewers(char *message, int size_message, char *board,
+    int board_size) {
+  check_new_viewers(board, board_size);
   for(int i = 0; i < NB_VIEWERS; i++) {
     send(viewers[i], message, size_message, 0);
+    // TODO remove the viewer if error
   }
 }
