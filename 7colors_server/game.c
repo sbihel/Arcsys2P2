@@ -31,7 +31,7 @@ void init_game()
     // ensure equality between the contestants
     char* board = malloc(BOARD_SIZE * BOARD_SIZE);
     symmetric_fill_board(board);
-    init_viewers(board, BOARD_SIZE, SYMBOL_0);
+    init_viewers(board, BOARD_SIZE);
     game(board, depths, game_types);
   }
 }
@@ -212,7 +212,7 @@ void tournament(char* game_types, int* depths, int nb_games)
   int i;
   for(i = 0; i < nb_games; i++) {
     symmetric_fill_board(board); // ensure equality between the contestants
-    init_viewers(board, BOARD_SIZE, SYMBOL_0);
+    init_viewers(board, BOARD_SIZE);
     char winner = game(board, depths, game_types);
     res[(int)winner]++;
   }
