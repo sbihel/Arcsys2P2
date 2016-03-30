@@ -106,6 +106,7 @@ void close_server() {
  * players
  */
 void init_viewers(char *board, int board_size, char current_player){
+  // TODO remove char current_player argument, not used anymore
   char size_string[40];
   sprintf(size_string, "%d", board_size);
   char *message = malloc((board_size * board_size + 50) * sizeof(char));
