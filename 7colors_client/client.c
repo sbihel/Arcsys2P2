@@ -16,6 +16,9 @@
 
 #define MOVE_REQUEST "ceciestunerequetedemove"
 #define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
+#define PLAY_REQUEST "iwannaplaydude"
+#define SERVER_YES "forsure"
+#define SERVER_NO "nosorrybro"
 
 int sfd;
 
@@ -110,12 +113,36 @@ void send_game_type_client() {
   send(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   free(infos);
-  }
+}
 
+
+/** Send a play request to server
+ * If accepted, server will ask for game_type and move then
+ * If refused (because already two players for example), then exit
+ */
+void send_play_request() {
+  char server_yes[BUFF_SIZE];
+  char server_no[BUFF_SIZE];
+  sprintf(server_yes, SERVER_YES);
+  sprintf(server_no, SERVER_NO);
+  char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
+  sprintf(buffer, PLAY_REQUEST);
+  do {
+    recv(sfd, buffer, BUFF_SIZE, 0);
+    if (strcmp(buffer, server_yes)) {
+      printf("Server accepted your play request\n");
+      break;
+    } else if (strcmp(buffer, server_no)) {
+      printf("Server refused your play request\n");
+      exit(1); // TODO maybe auto switch to spectate then ?
+    }
+  } while (1);
+  free(buffer);
+}
 
 /** Init game by parsing the game_infos received from server
  */
-void init_spectate() {
+void spectate() {
 
   /* Getting infos from server */
   init_client();
@@ -149,5 +176,7 @@ void init_spectate() {
 
   free(board);
 }
+
+
 
 

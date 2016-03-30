@@ -89,8 +89,8 @@ char* ask_game_type_client()
     infos[2] = depth_;
     infos[0] = 3;
   } else {
-    infos = (char*) malloc (3 * sizeof(char));
-    infos[0] =2;
+    infos = (char*) malloc (2 * sizeof(char));
+    infos[0] = 2;
   }
   infos[1] = ans;
   return infos;

@@ -15,8 +15,8 @@ int main()
   printf("\n\n  Welcome to the 7 wonders of the world of the 7 colors\n"
       "  *****************************************************\n\n");
 
-  // Play the game !
-  init_spectate();
+  // Spectate
+  spectate();
 
   return 0; // Everything went well
 }
