@@ -15,6 +15,10 @@
 #define SERVER_IP "127.0.0.1"
 
 #define MOVE_REQUEST "ceciestunerequetedemove"
+#define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
+#define PLAY_REQUEST "iwannaplaydude"
+#define SERVER_YES "forsure"
+#define SERVER_NO "nosorrybro"
 
 int sfd;
 
@@ -74,7 +78,7 @@ char* get_next_move() {
 }
 
 
-/** Receive messages from server, and when a move reques is detected,
+/** Receive messages from server, and when a move request is detected,
  * send the move
  * @param move : next move to play
  */
@@ -82,7 +86,7 @@ void send_next_move(char move) {
   char move_request[BUFF_SIZE];
   sprintf(move_request, MOVE_REQUEST);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  sprintf(buffer, "\0");
+  sprintf(buffer, " ");
   do {
     recv(sfd, buffer, BUFF_SIZE, 0);
   } while (!strcmp(buffer, move_request));
@@ -91,10 +95,54 @@ void send_next_move(char move) {
   send(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   }
+  
+
+/** Receive messages from server, and when a game_type request is detected,
+ * send the infos, same format as in ask_game_type_client
+ */
+void send_game_type_client() {
+  char player_request[BUFF_SIZE];
+  sprintf(player_request, PLAYER_REQUEST);
+  char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
+  sprintf(buffer, " ");
+  do {
+    recv(sfd, buffer, BUFF_SIZE, 0);
+  } while (!strcmp(buffer, player_request));
+  char* infos = ask_game_type_client();
+  sprintf(buffer, infos);
+  send(sfd, buffer, BUFF_SIZE, 0);
+  free(buffer);
+  free(infos);
+}
+
+
+/** Send a play request to server
+ * If accepted, server will ask for game_type and move then
+ * If refused (because already two players for example), then exit
+ */
+void send_play_request() {
+  char server_yes[BUFF_SIZE];
+  char server_no[BUFF_SIZE];
+  sprintf(server_yes, SERVER_YES);
+  sprintf(server_no, SERVER_NO);
+  char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
+  sprintf(buffer, PLAY_REQUEST);
+  do {
+    recv(sfd, buffer, BUFF_SIZE, 0);
+    if (strcmp(buffer, server_yes)) {
+      printf("Server accepted your play request\n");
+      break;
+    } else if (strcmp(buffer, server_no)) {
+      printf("Server refused your play request\n");
+      exit(1); // TODO maybe auto switch to spectate then ?
+    }
+  } while (1);
+  free(buffer);
+}
 
 /** Init game by parsing the game_infos received from server
  */
-void init_spectate() {
+void spectate() {
 
   /* Getting infos from server */
   init_client();
@@ -127,6 +175,14 @@ void init_spectate() {
   game_spectate(board);
 
   free(board);
+}
+
+
+void play() {
+  send_play_request();
+  send_game_type_client();
+  // Ok, i need to know who is going to play first..
+  // TODO
 }
 
 

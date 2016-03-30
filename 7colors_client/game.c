@@ -64,6 +64,40 @@ char ask(int curPlayer)
   return nextColor;
 }
 
+/** Ask game type to player_client and return infos of char* type
+ * infos[0] is len of infos
+ * infos[1] is strategy
+ * infos[2] is depth if len >= 3
+ * infos must be freed after use
+ */
+char* ask_game_type_client()
+{
+  printf("How will you act ?\n"
+  "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
+  "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n");
+  char ans;
+  while((ans = getchar()) == '\n' || ans > '7' || ans < '1')
+      printf(">");
+  getchar(); // get rid of the '\n'
+  char* infos;
+  if (ans == '2' || ans == '3' || ans == '5') {
+    infos = (char*) malloc (3 * sizeof(char));
+    char depth_;
+    printf("How deep will the search go in the tree ?\n>");
+    scanf("%c", &depth_);
+    getchar();
+    infos[2] = depth_;
+    infos[0] = 3;
+  } else {
+    infos = (char*) malloc (2 * sizeof(char));
+    infos[0] = 2;
+  }
+  infos[1] = ans;
+  return infos;
+}
+
+
+
 /** The main game function, that runs a single game.
  * @param board An initialized board, as given by the server
  * @param curPlayer_ the current player in the game when server
