@@ -100,7 +100,7 @@ void send_next_move(char move) {
 /** Receive messages from server, and when a game_type request is detected,
  * send the infos, same format as in ask_game_type_client
  */
-void send_game_type_client() {
+char* send_game_type_client() {
   char player_request[BUFF_SIZE];
   sprintf(player_request, PLAYER_REQUEST);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
@@ -112,7 +112,7 @@ void send_game_type_client() {
   sprintf(buffer, infos);
   send(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
-  free(infos);
+  return infos;
 }
 
 
@@ -138,6 +138,16 @@ void send_play_request() {
     }
   } while (1);
   free(buffer);
+}
+
+
+/** Receive a message from server and return 1
+ * if the player is first to play, 0 otherwise
+ */
+int i_am_first() {
+  char c;
+  recv(sfd, &c, 1, 0);
+  return c;
 }
 
 /** Init game by parsing the game_infos received from server
@@ -180,9 +190,15 @@ void spectate() {
 
 void play() {
   send_play_request();
-  send_game_type_client();
-  // Ok, i need to know who is going to play first..
-  // TODO
+  char* infos = send_game_type_client();
+  char* board = get_initial_board();
+  
+  if (i_am_first()) { // first to pay
+    game_play(board, 0, infos);
+  } else { // second to play
+    game_play(board, 1, infos);
+  }
+  
 }
 
 

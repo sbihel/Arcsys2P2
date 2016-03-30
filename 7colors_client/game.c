@@ -100,7 +100,6 @@ char* ask_game_type_client()
 
 /** The main game function, that runs a single game.
  * @param board An initialized board, as given by the server
- * @param curPlayer_ the current player in the game when server
  * received spectating request
  */
 char game_spectate(char* board)
@@ -141,4 +140,106 @@ char game_spectate(char* board)
 
   }
   return (char) 0;
+}
+
+
+/** The main game function, that runs a single game.
+ * @param board An initialized board, as given by the server
+ * @param order 0 if first to play, 1 otherwise
+ * @parem infos about this client player, same format as in send_game_type_client
+ */
+char game_play(char* board, int order, char* infos)
+{
+  char myId = (char) order;
+  char curPlayer = 0;
+  
+  /* Initialize scores according to the current state of the game */
+  bool isFinished = false;
+  int nb_cells[2] = {1, 1};
+
+  printf("\033[2J");  // clear screen
+  print_board(board);
+  printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
+      (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+      (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+
+  while(!isFinished)
+  {
+    char nextColor = 'A';
+    
+    if (curPlayer != myId) { // other player turn
+      nextColor = get_next_move()[0];
+      
+    } else { // our turn
+    
+      switch(infos[1])
+      {
+        case '1': // human v. human
+          nextColor = ask(curPlayer);
+          break;
+        case '2': // alphabeta
+          nextColor = alphabeta_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                                           infos[2]);
+          printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
+                  nextColor);
+          break;
+        case '3': // minimax
+          nextColor = minimax_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                                         infos[2]);
+          printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
+                  nextColor);
+          break;
+        case '4': // hegemonic
+          nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                      (curPlayer)?BOARD_SIZE-1:0,
+                      (curPlayer)?0:BOARD_SIZE-1,
+                      (curPlayer)?-1:1, (curPlayer)?1:-1);
+          printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
+                  nextColor);
+          break;
+        case '5':
+          nextColor = alphabeta_with_expand_perimeter_depth(board,
+                                                  (curPlayer)?SYMBOL_1:SYMBOL_0,
+                                                  infos[1]);
+          printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n", curPlayer,
+                  nextColor);
+          break;
+        case '6':
+          nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+          printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+                  nextColor);
+          break;
+        case '7':
+          nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+          printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+                  nextColor);
+          break;
+
+        default:
+          break;
+    }
+  }
+
+    if(nextColor < 'A' || nextColor > 'G') {
+      // this is typically a 0x00 returned by alphabeta/minimaxi
+      // let's determine the first available move; if none, then move 'A'.
+      nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+    }
+    nb_cells[(int) curPlayer] += update_board(board,
+        (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
+    print_board(board);
+
+    printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
+        (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+        (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+    if(is_game_finished(nb_cells)) {
+      printf("\033[KPlayer %d won with an occupation rate of %.2f%%\n",
+          curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
+            * BOARD_SIZE));
+      break;
+    }
+    curPlayer = (curPlayer + 1) % 2;
+
+  }
+  return curPlayer;
 }

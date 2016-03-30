@@ -6,8 +6,10 @@ char* get_initial_board();
 char* get_next_move();
 
 void send_next_move(char move);
-void send_game_type_client();
+char* send_game_type_client();
 void send_play_request();
+
+int i_am_first();
 
 void spectate();
 void play();
