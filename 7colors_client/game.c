@@ -218,6 +218,7 @@ char game_play(char* board, int order, char* infos)
         default:
           break;
     }
+    send_next_move(nextColor);
   }
 
     if(nextColor < 'A' || nextColor > 'G') {

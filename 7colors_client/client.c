@@ -193,7 +193,7 @@ void play() {
   char* infos = send_game_type_client();
   char* board = get_initial_board();
   
-  if (i_am_first()) { // first to pay
+  if (i_am_first()) { // first to play
     game_play(board, 0, infos);
   } else { // second to play
     game_play(board, 1, infos);
