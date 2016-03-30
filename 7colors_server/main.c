@@ -3,7 +3,12 @@
 #include "game.h"
 #include <stdlib.h>
 #include "server.h"
+#include <signal.h>
 
+void int_handler(int sig) {
+  close_server();
+  exit(0);
+}
 
 /** Program entry point */
 int main()
@@ -17,6 +22,7 @@ int main()
 
   // Play the game !
   init_server();
+  signal(SIGINT, int_handler);
   init_game();
   close_server();
 

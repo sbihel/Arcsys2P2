@@ -6,5 +6,13 @@ void close_server();
 void init_viewers(char *board, int board_size);
 int update_viewers(char *message, int size_message, char *board,
         int board_size);
+void update_viewers_but_not_player(char *message, int size_message, char *board,
+    int board_size);
+int check_messages(char *message, int message_size);
+void accept_player(char *board, int board_size);
+void reject_player();
+char* ask_player_game_type();
+void announce_first_player(char firt_player);
+char ask_player_move();
 
 #endif
