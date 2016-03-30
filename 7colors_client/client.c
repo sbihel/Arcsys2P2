@@ -178,5 +178,11 @@ void spectate() {
 }
 
 
+void play() {
+  send_play_request();
+  send_game_type_client();
+  // Ok, i need to know who is going to play first..
+  // TODO
+}
 
 
