@@ -57,14 +57,51 @@
 \section*{Introduction}
 
 
-Nous avons dans un projet précédent programmé un jeu des 7 couleurs en langage \texttt{C}, permettant à des joueurs humains et des joueurs artificiels de s'affronter. Nous avions pour cela implémenté différentes stratégies utilisables par des intelligence artificielle, et nous avions comparé leurs efficacités à travers un tournoi. \\
+Nous avons dans un projet précédent programmé un jeu des 7 couleurs en langage \texttt{C}, permettant à des joueurs humains et des joueurs artificiels de s'affronter. Nous avions pour cela implémenté différentes stratégies utilisables par des intelligences artificielles, et nous avions comparé leurs efficacités à travers un tournoi. \\
 
-Mais tel que nous l'avons implémenté, si deux joueurs humains veulent jouer, ils doit le faire sur la même machine. Si un tiers veut regarder la partie en tant que spectateur, il doit être physiquement présent devant l'écran de la machine sur laquelle tourne le jeu. Ceci est peu pratique, et ne permet pas une diffusion à large échelle des informations. \\
+Mais tel que nous l'avons implémenté, si deux joueurs humains veulent jouer, ils doivent le faire sur la même machine. Si un tiers veut regarder la partie en tant que spectateur, il doit être physiquement présent devant l'écran de la machine sur laquelle tourne le jeu. Ceci est peu pratique, et ne permet pas une diffusion à large échelle des informations. \\
 
-C'est pourquoi nous allons à travers ce projet modifier notre code source afin de le rendre compatible à une utilisation par un réseau. Le but est de faire tourner le jeu sur un serveur, et d'avoir des clients qui peuvent se connecter au serveur soit pour jouer, soit pour assister au match, et éventuellement le retransmettre. \\
+C'est pourquoi nous allons à travers ce projet modifier notre code source afin de le rendre compatible à une utilisation par un réseau. Le but est de faire tourner le jeu sur un serveur, et d'avoir des clients qui peuvent se connecter au serveur soit pour jouer, soit pour assister au match et le retransmettre. \\
 
-\TODO annonce étapes démarche, mais faut coder avant ;)
+Dans un premier temps, on s'intéresse à l'ajout de spectateurs, puis on fait jouer des joueurs à distance, et enfin, on modifie le serveur pour qu'il impose des contraintes équitables aux joueurs.
 
+\section{Ajout de spectateurs}
+
+
+Pour assister à un match en cours sur un serveur, on utilise la fonction \texttt{spectate()}. Cette fonction suit les différentes étapes suivantes :
+
+%
+\begin{itemize}
+	\setlength\itemsep{1em}
+	\item On ouvre une socket client, et on se connecte au serveur.
+	\item On reçoit du serveur l'état actuel du jeu, la chaîne de caractère suit le format suivant :
+
+		\bgroup
+		\def\arraystretch{1.5}
+		\begin{center}
+		\begin{tabular}{|c|c|}
+			\hline 
+			\texttt{board\_size[40]} & \texttt{board[board\_size * board\_size]} \\ 
+			\hline 
+		\end{tabular} 	
+		\end{center}
+		\egroup
+	
+	\item On lance alors une partie qui démarre de la configuration reçue, en local. Le serveur envoie un coup sous la forme d'une chaîne de deux caractères. Le premier est la valeur du coup (donc une couleur), et le deuxième le symbole du joueur jouant ce coup. On met à jour le jeu local selon ces informations, et on affiche l'état courant du jeu. 
+	\item Lorsque la partie est détectée en local comme étant terminée, on affiche le résultat final, et la socket client se ferme. \\
+
+\end{itemize}
+%
+
+
+Côté serveur, le protocole est un peu plus compliqué, puisqu'on veut pouvoir gérer potentiellement plusieurs spectateurs, dont certains qui arrivent en cours de partie.
+\TODO
+
+
+\section{Joueurs à distance}
+
+
+\section{Contraintes imposées par le serveur}
 
 
 \section*{Conclusion}

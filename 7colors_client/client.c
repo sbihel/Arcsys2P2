@@ -91,7 +91,6 @@ void send_next_move(char move) {
     recv(sfd, buffer, BUFF_SIZE, 0);
   } while (!strcmp(buffer, move_request));
   buffer[0] = move;
-  buffer[1] = " ";
   send(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   }
@@ -127,6 +126,7 @@ void send_play_request() {
   sprintf(server_no, SERVER_NO);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, PLAY_REQUEST);
+  send(sfd, buffer, BUFF_SIZE, 0);
   do {
     recv(sfd, buffer, BUFF_SIZE, 0);
     if (strcmp(buffer, server_yes)) {
@@ -134,7 +134,8 @@ void send_play_request() {
       break;
     } else if (strcmp(buffer, server_no)) {
       printf("Server refused your play request\n");
-      exit(1); // TODO maybe auto switch to spectate then ?
+      printf("Redirecting you to spectating\n");
+      spectate();
     }
   } while (1);
   free(buffer);
@@ -150,7 +151,8 @@ int i_am_first() {
   return c;
 }
 
-/** Init game by parsing the game_infos received from server
+
+/** Spectating a game
  */
 void spectate() {
 
@@ -188,6 +190,8 @@ void spectate() {
 }
 
 
+/** Sending a play request, and playing if accepted
+ */
 void play() {
   send_play_request();
   char* infos = send_game_type_client();
