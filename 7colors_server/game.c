@@ -1,4 +1,5 @@
 #include "game.h"
+bool distant_player = false;
 
 /** Determine whether game is finished, i.e. a player has more than half of
  * the available cells.
@@ -21,13 +22,20 @@ void init_game()
   // ask the user for the number of games to play
   unsigned int nb_games = ask_tournament();
 
-  /*char *message = (char*) malloc(1024);*/
-  /*if(check_messages(message, 1024)) {*/
-    /*acc*/
-  /*}*/
   // ask the user for players strategies
-  ask_game_type(&(game_types[0]), &(depths[0]), (char)0x00);
-  ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
+  char *message = (char*) malloc(1024);
+  if(check_messages(message, 1024)) {
+    accept_player();
+    distant_player = true;
+    char *game_type_response = ask_player_game_type();
+    // asks the client its role
+    game_types[0] = game_type_response[1];
+    depths[0] = game_type_response[2];
+    ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
+  } else {
+    ask_game_type(&(game_types[0]), &(depths[0]), (char)0x00);
+    ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
+  }
 
   if(nb_games > 1)
     tournament(game_types, depths, nb_games);
@@ -36,6 +44,8 @@ void init_game()
     char* board = malloc(BOARD_SIZE * BOARD_SIZE);
     symmetric_fill_board(board);
     init_viewers(board, BOARD_SIZE);
+    if(distant_player)
+      announce_first_player('1');
     game(board, depths, game_types);
   }
 }
@@ -129,42 +139,63 @@ char game(char* board, int* depths, char* game_types)
     switch(game_types[(int)curPlayer])
     {
       case '1': // human v. human
-        nextColor = ask(curPlayer);
+        if(!distant_player)
+          nextColor = ask(curPlayer);
+        else
+          nextColor = ask_player_move();
         break;
       case '2': // alphabeta
-        nextColor = alphabeta_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-                                         depths[(int)curPlayer]);
+        if(!distant_player)
+          nextColor = alphabeta_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+              depths[(int)curPlayer]);
+        else
+          nextColor = ask_player_move();
         printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
                 nextColor);
         break;
       case '3': // minimax
-        nextColor = minimax_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-                                       depths[(int)curPlayer]);
+        if(!distant_player)
+          nextColor = minimax_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+              depths[(int)curPlayer]);
+        else
+          nextColor = ask_player_move();
         printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
                 nextColor);
         break;
       case '4': // hegemonic
-        nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-                    (curPlayer)?BOARD_SIZE-1:0,
-                    (curPlayer)?0:BOARD_SIZE-1,
-                    (curPlayer)?-1:1, (curPlayer)?1:-1);
+        if(!distant_player)
+          nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+              (curPlayer)?BOARD_SIZE-1:0,
+              (curPlayer)?0:BOARD_SIZE-1,
+              (curPlayer)?-1:1, (curPlayer)?1:-1);
+        else
+          nextColor = ask_player_move();
         printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
                 nextColor);
         break;
       case '5':
-        nextColor = alphabeta_with_expand_perimeter_depth(board,
-                                                (curPlayer)?SYMBOL_1:SYMBOL_0,
-                                                depths[(int)curPlayer]);
+        if(!distant_player)
+          nextColor = alphabeta_with_expand_perimeter_depth(board,
+              (curPlayer)?SYMBOL_1:SYMBOL_0,
+              depths[(int)curPlayer]);
+        else
+          nextColor = ask_player_move();
         printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n", curPlayer,
                 nextColor);
         break;
       case '6':
-        nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+        if(!distant_player)
+          nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+        else
+          nextColor = ask_player_move();
         printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
                 nextColor);
         break;
       case '7':
-        nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+        if(!distant_player)
+          nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+        else
+          nextColor = ask_player_move();
         printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
                 nextColor);
         break;
@@ -217,6 +248,8 @@ void tournament(char* game_types, int* depths, int nb_games)
   for(i = 0; i < nb_games; i++) {
     symmetric_fill_board(board); // ensure equality between the contestants
     init_viewers(board, BOARD_SIZE);
+    if(distant_player)
+      announce_first_player('1');
     char winner = game(board, depths, game_types);
     res[(int)winner]++;
   }

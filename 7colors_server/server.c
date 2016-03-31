@@ -278,11 +278,10 @@ int check_messages(char *message, int message_size) {
   return 0;
 }
 
-void accept_player(char *board, int board_size) {
+void accept_player() {
   send(potential_player, SERVER_YES, sizeof(SERVER_YES), 0);
   player_socket = potential_player;
   viewers[current_nb_viewers] = player_socket;
-  init_viewer(board, board_size, current_nb_viewers);
   current_nb_viewers++;
 }
 
@@ -293,11 +292,12 @@ void reject_player() {
 
 char* ask_player_game_type() {
   send(player_socket, MOVE_REQUEST, sizeof(MOVE_REQUEST), 0);
-  char *response = "100";
+  char *response = "010";
   recv(potential_player, response, 3, 0);
   return response;
 }
 
+// first_player = '1' if distant player plays firt
 void announce_first_player(char firt_player) {
   send(player_socket, &firt_player, 1, 0);
 }
