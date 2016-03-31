@@ -112,6 +112,31 @@ void close_server() {
 }
 
 
+void init_player(char *board, int board_size) {
+  char size_string[40];
+  sprintf(size_string, "%d", board_size);
+  char *message = malloc((board_size * board_size + 50) * sizeof(char));
+
+  int j;
+  j = 0;
+  while(size_string[j] != '\0') {
+    message[j] = size_string[j];
+    j++;
+  }
+  message[j] = ' ';
+  j++;
+  for(int k = 0; k < board_size * board_size; k++) {
+    message[j] = board[k];
+    j++;
+  }
+
+  message[++j] = '\0';
+
+  send(player_socket, message, (board_size * board_size + 50) *
+      sizeof(char), 0);
+  free(message);
+}
+
 void init_viewer(char *board, int board_size, int index_viewer) {
   char size_string[40];
   sprintf(size_string, "%d", board_size);
@@ -235,8 +260,8 @@ int check_messages(char *message, int message_size) {
   FD_ZERO(&readfds);
   FD_SET(sfd, &readfds);
   struct timeval tv;
-  tv.tv_sec = 0;
-  tv.tv_usec = 100;
+  tv.tv_sec = 4;
+  tv.tv_usec = 0;
   if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
     perror("select");
     exit(1);
