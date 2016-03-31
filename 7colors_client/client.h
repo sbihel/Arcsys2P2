@@ -1,6 +1,9 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+void client_to_server(int sfd, void* buff, size_t buff_len, int flags);
+void server_to_client(int sfd, void* buff, size_t buff_len, int flags);
+
 int init_client();
 char* get_initial_board();
 char* get_next_move();
