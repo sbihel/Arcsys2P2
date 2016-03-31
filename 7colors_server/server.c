@@ -14,6 +14,14 @@
 int viewers[NB_VIEWERS];
 int sfd;
 int current_nb_viewers = 0;
+int player_socket;
+int potential_player;
+
+#define MOVE_REQUEST "ceciestunerequetedemove"
+#define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
+#define PLAY_REQUEST "iwannaplaydude"
+#define SERVER_YES "forsure"
+#define SERVER_NO "nosorrybro"
 
 
 int init_server() {
@@ -209,4 +217,69 @@ void update_viewers(char *message, int size_message, char *board,
     send(viewers[i], message, size_message, 0);
     // TODO remove the viewer if error
   }
+}
+
+void update_viewers_but_not_player(char *message, int size_message, char *board,
+    int board_size) {
+  check_new_viewers(board, board_size);
+  for(int i = 0; i < NB_VIEWERS; i++) {
+    if(viewers[i] != player_socket) {
+    send(viewers[i], message, size_message, 0);
+    // TODO remove the viewer if error
+    }
+  }
+}
+
+int check_messages(char *message, int message_size) {
+  fd_set readfds;
+  FD_ZERO(&readfds);
+  FD_SET(sfd, &readfds);
+  struct timeval tv;
+  tv.tv_sec = 0;
+  tv.tv_usec = 100;
+  if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
+    perror("select");
+    exit(1);
+  }
+  for(int i = 0; i < NB_VIEWERS; i++) {
+    if(FD_ISSET(viewers[i], &readfds)) {
+      recv(viewers[i], message, message_size, 0);
+      if(strcmp(message, PLAY_REQUEST)) {
+        potential_player = viewers[i];
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+void accept_player(char *board, int board_size) {
+  send(potential_player, SERVER_YES, sizeof(SERVER_YES), 0);
+  player_socket = potential_player;
+  viewers[current_nb_viewers] = player_socket;
+  init_viewer(board, board_size, current_nb_viewers);
+  current_nb_viewers++;
+}
+
+void reject_player() {
+  send(potential_player, SERVER_NO, sizeof(SERVER_NO), 0);
+  potential_player = 0;
+}
+
+char* ask_player_game_type() {
+  send(player_socket, MOVE_REQUEST, sizeof(MOVE_REQUEST), 0);
+  char *response = "100";
+  recv(potential_player, response, 3, 0);
+  return response;
+}
+
+void announce_first_player(char firt_player) {
+  send(player_socket, &firt_player, 1, 0);
+}
+
+char ask_player_move() {
+  send(player_socket, MOVE_REQUEST, sizeof(MOVE_REQUEST), 0);
+  char response;
+  recv(player_socket, &response, 1, 0);
+  return response;
 }
