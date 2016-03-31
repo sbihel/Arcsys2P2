@@ -21,6 +21,10 @@ void init_game()
   // ask the user for the number of games to play
   unsigned int nb_games = ask_tournament();
 
+  /*char *message = (char*) malloc(1024);*/
+  /*if(check_messages(message, 1024)) {*/
+    /*acc*/
+  /*}*/
   // ask the user for players strategies
   ask_game_type(&(game_types[0]), &(depths[0]), (char)0x00);
   ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
