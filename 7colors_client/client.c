@@ -14,7 +14,9 @@
 #define PORT_NB "7777"
 #define SERVER_IP "127.0.0.1"
 
-#define MAX_SERVER_MISS 5
+  /* Exiting if server is not responding
+   * after 2^(MAX_SERVER_MISS) - 1 seconds */
+#define MAX_SERVER_MISS 3
 
 #define MOVE_REQUEST "ceciestunerequetedemove"
 #define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
@@ -30,12 +32,14 @@ int sfd;
  */
 void client_to_server(int sfd, void* buff, size_t buff_len, int flags) {
   int i = MAX_SERVER_MISS;
+  int wait_time = 1;
   while (i > 0) {
     if (send(sfd, buff, buff_len, flags) > 0) {
       break;
     } else {
       i--;
-      sleep(0.1);
+      sleep(wait_time);
+      wait_time *= 2;
     }
   }
   if (i == 0) {
@@ -50,12 +54,14 @@ void client_to_server(int sfd, void* buff, size_t buff_len, int flags) {
  */
 void server_to_client(int sfd, void* buff, size_t buff_len, int flags) {
   int i = MAX_SERVER_MISS;
+  int wait_time = 1;
   while (i > 0) {
     if (recv(sfd, buff, buff_len, flags) > 0) {
       break;
     } else {
       i--;
-      sleep(0.1);
+      sleep(wait_time);
+      wait_time *= 2;
     }
   }
   if (i == 0) {
