@@ -14,6 +14,10 @@
 #define PORT_NB "7777"
 #define SERVER_IP "127.0.0.1"
 
+  /* Exiting if server is not responding
+   * after 2^(MAX_SERVER_MISS) - 1 seconds */
+#define MAX_SERVER_MISS 3
+
 #define MOVE_REQUEST "ceciestunerequetedemove"
 #define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
 #define PLAY_REQUEST "iwannaplaydude"
@@ -22,6 +26,49 @@
 
 int sfd;
 
+/** Use send function, and try several times if not working
+ * if not working after MAX_SERVER_MISS tries, error is returned,
+ * meaning server is not responding
+ */
+void client_to_server(int sfd, void* buff, size_t buff_len, int flags) {
+  int i = MAX_SERVER_MISS;
+  int wait_time = 1;
+  while (i > 0) {
+    if (send(sfd, buff, buff_len, flags) > 0) {
+      break;
+    } else {
+      i--;
+      sleep(wait_time);
+      wait_time *= 2;
+    }
+  }
+  if (i == 0) {
+    printf("Sending to server not working\n");
+    exit(1);
+  }
+}
+
+/** Use recv function, and try several times if not working
+ * if not working after MAX_SERVER_MISS tries, error is returned,
+ * meaning server is not responding
+ */
+void server_to_client(int sfd, void* buff, size_t buff_len, int flags) {
+  int i = MAX_SERVER_MISS;
+  int wait_time = 1;
+  while (i > 0) {
+    if (recv(sfd, buff, buff_len, flags) > 0) {
+      break;
+    } else {
+      i--;
+      sleep(wait_time);
+      wait_time *= 2;
+    }
+  }
+  if (i == 0) {
+    printf("Receiving from server not working\n");
+    exit(1);
+  }
+}
 
 /** Open a client socket
  */
@@ -62,7 +109,7 @@ int init_client() {
  */
 char* get_initial_board() {
   char* game_infos = (char*) malloc (BUFF_SIZE*sizeof(char));
-  recv(sfd, game_infos, BUFF_SIZE, 0);
+  server_to_client(sfd, game_infos, BUFF_SIZE, 0);
   return game_infos;
 }
 
@@ -73,7 +120,7 @@ char* get_initial_board() {
  */
 char* get_next_move() {
   char* c = (char*) malloc (2*sizeof(char));
-  recv(sfd, c, 2, 0);
+  server_to_client(sfd, c, 2, 0);
   return c;
 }
 
@@ -88,10 +135,10 @@ void send_next_move(char move) {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, " ");
   do {
-    recv(sfd, buffer, BUFF_SIZE, 0);
+    server_to_client(sfd, buffer, BUFF_SIZE, 0);
   } while (!strcmp(buffer, move_request));
   buffer[0] = move;
-  send(sfd, buffer, BUFF_SIZE, 0);
+  client_to_server(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   }
   
@@ -105,11 +152,11 @@ char* send_game_type_client() {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, " ");
   do {
-    recv(sfd, buffer, BUFF_SIZE, 0);
+    server_to_client(sfd, buffer, BUFF_SIZE, 0);
   } while (!strcmp(buffer, player_request));
   char* infos = ask_game_type_client();
   sprintf(buffer, infos);
-  send(sfd, buffer, BUFF_SIZE, 0);
+  client_to_server(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   return infos;
 }
@@ -126,9 +173,9 @@ void send_play_request() {
   sprintf(server_no, SERVER_NO);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, PLAY_REQUEST);
-  send(sfd, buffer, BUFF_SIZE, 0);
+  client_to_server(sfd, buffer, BUFF_SIZE, 0);
   do {
-    recv(sfd, buffer, BUFF_SIZE, 0);
+    server_to_client(sfd, buffer, BUFF_SIZE, 0);
     if (strcmp(buffer, server_yes)) {
       printf("Server accepted your play request\n");
       break;
@@ -147,7 +194,7 @@ void send_play_request() {
  */
 int i_am_first() {
   char c;
-  recv(sfd, &c, 1, 0);
+  server_to_client(sfd, &c, 1, 0);
   return c;
 }
 
