@@ -16,8 +16,8 @@ int main()
       "  *****************************************************\n\n");
 
   // Spectate
-  //spectate();
-  play();
+  spectate();
+  //play();
 
   return 0; // Everything went well
 }
