@@ -30,7 +30,7 @@ void init_game()
     // asks the client its role
     game_types[0] = game_type_response[1];
     depths[0] = game_type_response[2];
-    printf("%s %d%d", game_types, depths[0], depths[1]);
+    printf("%s %c%c", game_types, depths[0], depths[1]);
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
   } else {
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x00);
@@ -45,7 +45,7 @@ void init_game()
     symmetric_fill_board(board);
     init_viewers(board, BOARD_SIZE);
     if(distant_player)
-      announce_first_player('1');
+      announce_first_player('0');
     game(board, depths, game_types);
   }
 }
@@ -139,13 +139,13 @@ char game(char* board, int* depths, char* game_types)
     switch(game_types[(int)curPlayer])
     {
       case '1': // human v. human
-        if(!distant_player)
+        if(!distant_player || (int)curPlayer == 1)
           nextColor = ask(curPlayer);
         else
           nextColor = ask_player_move();
         break;
       case '2': // alphabeta
-        if(!distant_player)
+        if(!distant_player || (int)curPlayer == 1)
           nextColor = alphabeta_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
               depths[(int)curPlayer]);
         else
@@ -154,7 +154,7 @@ char game(char* board, int* depths, char* game_types)
                 nextColor);
         break;
       case '3': // minimax
-        if(!distant_player)
+        if(!distant_player || (int)curPlayer == 1)
           nextColor = minimax_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
               depths[(int)curPlayer]);
         else
@@ -163,7 +163,7 @@ char game(char* board, int* depths, char* game_types)
                 nextColor);
         break;
       case '4': // hegemonic
-        if(!distant_player)
+        if(!distant_player || (int)curPlayer == 1)
           nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
               (curPlayer)?BOARD_SIZE-1:0,
               (curPlayer)?0:BOARD_SIZE-1,
@@ -174,7 +174,7 @@ char game(char* board, int* depths, char* game_types)
                 nextColor);
         break;
       case '5':
-        if(!distant_player)
+        if(!distant_player || (int)curPlayer == 1)
           nextColor = alphabeta_with_expand_perimeter_depth(board,
               (curPlayer)?SYMBOL_1:SYMBOL_0,
               depths[(int)curPlayer]);
@@ -184,7 +184,7 @@ char game(char* board, int* depths, char* game_types)
                 nextColor);
         break;
       case '6':
-        if(!distant_player)
+        if(!distant_player || (int)curPlayer == 1)
           nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
         else
           nextColor = ask_player_move();
@@ -192,7 +192,7 @@ char game(char* board, int* depths, char* game_types)
                 nextColor);
         break;
       case '7':
-        if(!distant_player)
+        if(!distant_player || (int)curPlayer == 1)
           nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
         else
           nextColor = ask_player_move();

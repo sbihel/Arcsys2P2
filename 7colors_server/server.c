@@ -316,14 +316,18 @@ char* ask_player_game_type() {
   return response;
 }
 
-// first_player = '1' if distant player plays firt
+// first_player = '0' if distant player plays firt
 void announce_first_player(char firt_player) {
   send(player_socket, &firt_player, 1, 0);
 }
 
 char ask_player_move() {
+  printf("HELLLOOW\n");
+  sleep(2);
+  usleep(50);
   send(player_socket, MOVE_REQUEST, sizeof(MOVE_REQUEST), 0);
   char response;
+  usleep(10);
   recv(player_socket, &response, 1, 0);
   return response;
 }

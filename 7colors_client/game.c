@@ -170,7 +170,6 @@ char game_play(char* board, int order, char* infos)
 
     if (curPlayer != myId) { // other player turn
       nextColor = get_next_move()[0];
-
     } else { // our turn
 
       switch(infos[1])
@@ -202,8 +201,8 @@ char game_play(char* board, int order, char* infos)
           nextColor = alphabeta_with_expand_perimeter_depth(board,
                                                   (curPlayer)?SYMBOL_1:SYMBOL_0,
                                                   infos[1]);
-          printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n", curPlayer,
-                  nextColor);
+          printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n",
+              curPlayer, nextColor);
           break;
         case '6':
           nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
