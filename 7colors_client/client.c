@@ -10,6 +10,9 @@
 #include <errno.h>
 #include "game.h"
 
+  /* BUFF_SIZE is size of char* used to get message from server
+   * Must be longer than size of *_REQUEST and SERVER_*
+   */
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
 #define SERVER_IP "127.0.0.1"
@@ -130,13 +133,11 @@ char* get_next_move() {
  * @param move : next move to play
  */
 void send_next_move(char move) {
-  char move_request[BUFF_SIZE];
-  sprintf(move_request, MOVE_REQUEST);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, " ");
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
-  } while (strcmp(buffer, move_request) != 0);
+  } while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);
   buffer[0] = move;
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
@@ -147,13 +148,11 @@ void send_next_move(char move) {
  * send the infos, same format as in ask_game_type_client
  */
 char* send_game_type_client() {
-  char player_request[BUFF_SIZE];
-  sprintf(player_request, PLAYER_REQUEST);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, " ");
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
-  } while (strcmp(buffer, player_request) != 0);
+  } while (strncmp(buffer, PLAYER_REQUEST, sizeof(PLAYER_REQUEST)) != 0);
   char* infos = ask_game_type_client();
   sprintf(buffer, infos);
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
@@ -167,19 +166,15 @@ char* send_game_type_client() {
  * If refused (because already two players for example), then exit
  */
 void send_play_request() {
-  char server_yes[BUFF_SIZE];
-  char server_no[BUFF_SIZE];
-  sprintf(server_yes, SERVER_YES);
-  sprintf(server_no, SERVER_NO);
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, PLAY_REQUEST);
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
-    if (strcmp(buffer, server_yes) == 0) {
+    if (strncmp(buffer, SERVER_YES, sizeof(SERVER_YES)) == 0) {
       printf("Server accepted your play request\n");
       break;
-    } else if (strcmp(buffer, server_no == 0)) {
+    } else if (strncmp(buffer, SERVER_NO, sizeof(SERVER_NO)) == 0) {
       printf("Server refused your play request\n");
       printf("Redirecting you to spectating\n");
       spectate();
