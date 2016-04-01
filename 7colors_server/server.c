@@ -230,7 +230,6 @@ void check_new_viewers(char *board, int board_size) {
 
       viewers[current_nb_viewers] = clientfd;
       init_viewer(board, board_size, current_nb_viewers);
-      // TODO init viewers
       current_nb_viewers++;
     }
 }
@@ -262,6 +261,7 @@ int check_messages(char *message, int message_size) {
   struct timeval tv;
   tv.tv_sec = 4;
   tv.tv_usec = 0;
+  printf("Waiting for messages...\n");
   if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
     perror("select");
     exit(1);
@@ -281,8 +281,8 @@ int check_messages(char *message, int message_size) {
 void accept_player() {
   send(potential_player, SERVER_YES, sizeof(SERVER_YES), 0);
   player_socket = potential_player;
-  viewers[current_nb_viewers] = player_socket;
-  current_nb_viewers++;
+  /*viewers[current_nb_viewers] = player_socket;*/
+  /*current_nb_viewers++;*/
 }
 
 void reject_player() {

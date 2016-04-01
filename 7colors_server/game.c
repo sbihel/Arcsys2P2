@@ -31,11 +31,13 @@ void init_game()
     // asks the client its role
     game_types[0] = game_type_response[1];
     depths[0] = game_type_response[2];
+    printf("%s %d%d", game_types, depths[0], depths[1]);
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
   } else {
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x00);
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
   }
+  free(message);
 
   if(nb_games > 1)
     tournament(game_types, depths, nb_games);
