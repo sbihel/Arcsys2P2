@@ -28,6 +28,7 @@
 #define SERVER_NO "nosorrybro"
 
 int sfd;
+int sfd_s;
 
 /** Use send function, and try several times if not working
  * if not working after MAX_SERVER_MISS tries, error is returned,
@@ -37,7 +38,7 @@ void client_to_server(int sfd, void* buff, size_t buff_len, int flags) {
   int i = MAX_SERVER_MISS;
   int wait_time = 1;
   while (i > 0) {
-    if (send(sfd, buff, buff_len, flags) > 0) {
+    if (send(sfd_s, buff, buff_len, flags) > 0) {
       break;
     } else {
       i--;
@@ -103,6 +104,7 @@ int init_client() {
     perror("Connect");
     exit(1);
   }
+  sfd_s = c;
 
   return 0;
 }
@@ -142,7 +144,7 @@ void send_next_move(char move) {
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
   }
-  
+
 
 /** Receive messages from server, and when a game_type request is detected,
  * send the infos, same format as in ask_game_type_client
@@ -168,7 +170,11 @@ char* send_game_type_client() {
 void send_play_request() {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   sprintf(buffer, PLAY_REQUEST);
+  printf("lemme play\n");
+  fflush(stdout);
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
+  printf("asked play\n");
+  fflush(stdout);
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
     if (strncmp(buffer, SERVER_YES, sizeof(SERVER_YES)) == 0) {
@@ -236,16 +242,16 @@ void spectate() {
  */
 void play() {
   init_client();
+  printf("before sleep\n");
+  sleep(1);
   send_play_request();
   char* infos = send_game_type_client();
   char* board = get_initial_board();
-  
+
   if (i_am_first()) { // first to play
     game_play(board, 0, infos);
   } else { // second to play
     game_play(board, 1, infos);
   }
-  
+
 }
-
-

@@ -23,8 +23,7 @@ void init_game()
   unsigned int nb_games = ask_tournament();
 
   // ask the user for players strategies
-  char *message = (char*) malloc(1024);
-  if(check_messages(message, 1024)) {
+  if(is_there_potential_player()) {
     accept_player();
     distant_player = true;
     char *game_type_response = ask_player_game_type();
@@ -37,7 +36,6 @@ void init_game()
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x00);
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
   }
-  free(message);
 
   if(nb_games > 1)
     tournament(game_types, depths, nb_games);

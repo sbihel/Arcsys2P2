@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
@@ -23,6 +24,37 @@ int potential_player;
 #define SERVER_YES "forsure"
 #define SERVER_NO "nosorrybro"
 
+
+bool is_there_potential_player() {
+  return potential_player != 0;
+}
+
+int check_messages(char *message, int message_size) {
+  fd_set readfds;
+  FD_ZERO(&readfds);
+  FD_SET(sfd, &readfds);
+/*  for(int i = 0; i < current_nb_viewers; i++)*/
+    /*FD_SET(viewers[i], &readfds);*/
+  struct timeval tv;
+  tv.tv_sec = 2;
+  tv.tv_usec = 0;
+  printf("Waiting for messages...\n");
+  if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
+    perror("select");
+    exit(1);
+  }
+  for(int i = 0; i < current_nb_viewers; i++) {
+    if(FD_ISSET(viewers[i], &readfds)) {
+      recv(viewers[i], message, message_size, 0);
+      printf("|| %s || %s ||", message, PLAY_REQUEST);
+      if(strcmp(message, PLAY_REQUEST)) {
+        potential_player = viewers[i];
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
 
 int init_server() {
   for(int i = 0; i < NB_VIEWERS; i++)
@@ -66,7 +98,7 @@ int init_server() {
   while(!viewers[NB_VIEWERS-1]) {
     struct timeval tv;
     fd_set readfds;
-    tv.tv_sec = 2;
+    tv.tv_sec = 4;
     tv.tv_usec = 500000;  // wait 2.5 seconds before timeout
 
     FD_ZERO(&readfds);
@@ -92,8 +124,11 @@ int init_server() {
 
       printf("Accepted %s\n", client_addr_str);
       viewers[current_nb_viewers] = clientfd;
-
       current_nb_viewers++;
+
+      char *message = (char*) malloc(1024);
+      check_messages(message, 1024);
+      free(message);
     } else {
       printf("Initial wait is over, let's start.\n");
       break;
@@ -252,30 +287,6 @@ void update_viewers_but_not_player(char *message, int size_message, char *board,
     // TODO remove the viewer if error
     }
   }
-}
-
-int check_messages(char *message, int message_size) {
-  fd_set readfds;
-  FD_ZERO(&readfds);
-  FD_SET(sfd, &readfds);
-  struct timeval tv;
-  tv.tv_sec = 4;
-  tv.tv_usec = 0;
-  printf("Waiting for messages...\n");
-  if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
-    perror("select");
-    exit(1);
-  }
-  for(int i = 0; i < NB_VIEWERS; i++) {
-    if(FD_ISSET(viewers[i], &readfds)) {
-      recv(viewers[i], message, message_size, 0);
-      if(strcmp(message, PLAY_REQUEST)) {
-        potential_player = viewers[i];
-        return 1;
-      }
-    }
-  }
-  return 0;
 }
 
 void accept_player() {

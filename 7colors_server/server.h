@@ -15,5 +15,6 @@ void reject_player();
 char* ask_player_game_type();
 void announce_first_player(char firt_player);
 char ask_player_move();
+bool is_there_potential_player();
 
 #endif
