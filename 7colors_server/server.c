@@ -33,21 +33,23 @@ int check_messages(char *message, int message_size) {
   fd_set readfds;
   FD_ZERO(&readfds);
   FD_SET(sfd, &readfds);
-/*  for(int i = 0; i < current_nb_viewers; i++)*/
-    /*FD_SET(viewers[i], &readfds);*/
+  int max_sfd = sfd;
+  for(int i = 0; i < current_nb_viewers; i++) {
+    FD_SET(viewers[i], &readfds);
+    max_sfd = (max_sfd<viewers[i])?viewers[i]:max_sfd;
+  }
   struct timeval tv;
   tv.tv_sec = 2;
   tv.tv_usec = 0;
   printf("Waiting for messages...\n");
-  if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
+  if (select(max_sfd+1, &readfds, NULL, NULL, &tv) < 0) {
     perror("select");
     exit(1);
   }
   for(int i = 0; i < current_nb_viewers; i++) {
     if(FD_ISSET(viewers[i], &readfds)) {
       recv(viewers[i], message, message_size, 0);
-      printf("|| %s || %s ||", message, PLAY_REQUEST);
-      if(strcmp(message, PLAY_REQUEST)) {
+      if(strncmp(message, PLAY_REQUEST, 14) == 0) {
         potential_player = viewers[i];
         return 1;
       }
@@ -292,6 +294,7 @@ void update_viewers_but_not_player(char *message, int size_message, char *board,
 void accept_player() {
   send(potential_player, SERVER_YES, sizeof(SERVER_YES), 0);
   player_socket = potential_player;
+  printf("Accepted player %d\n", player_socket);
   /*viewers[current_nb_viewers] = player_socket;*/
   /*current_nb_viewers++;*/
 }
@@ -302,7 +305,12 @@ void reject_player() {
 }
 
 char* ask_player_game_type() {
-  send(player_socket, MOVE_REQUEST, sizeof(MOVE_REQUEST), 0);
+  printf("lel1");
+  fflush(stdout);
+  usleep(100);
+  send(player_socket, &PLAYER_REQUEST, sizeof(PLAYER_REQUEST), 0);
+  printf("lel2");
+  fflush(stdout);
   char *response = "010";
   recv(potential_player, response, 3, 0);
   return response;

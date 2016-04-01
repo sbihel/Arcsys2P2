@@ -74,7 +74,8 @@ char* ask_game_type_client()
 {
   printf("How will you act ?\n"
   "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
-  "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n");
+  "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n"
+  ">");
   char ans;
   while((ans = getchar()) == '\n' || ans > '7' || ans < '1')
       printf(">");
@@ -104,7 +105,7 @@ char* ask_game_type_client()
  */
 char game_spectate(char* board)
 {
-  
+
   /* Initialize scores according to the current state of the game */
   bool isFinished = false;
   int* scores = get_current_score(board);
@@ -118,7 +119,7 @@ char game_spectate(char* board)
       (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
 
   while(!isFinished)
-  { 
+  {
     char* c = get_next_move();
     char nextColor = 'A';
     nextColor = c[0];
@@ -134,7 +135,7 @@ char game_spectate(char* board)
           c[1], (double) 100.0 * nb_cells[(int) c[1]] / (BOARD_SIZE
             * BOARD_SIZE));
       break;
-      
+
     free(c);
     }
 
@@ -152,7 +153,7 @@ char game_play(char* board, int order, char* infos)
 {
   char myId = (char) order;
   char curPlayer = 0;
-  
+
   /* Initialize scores according to the current state of the game */
   bool isFinished = false;
   int nb_cells[2] = {1, 1};
@@ -166,12 +167,12 @@ char game_play(char* board, int order, char* infos)
   while(!isFinished)
   {
     char nextColor = 'A';
-    
+
     if (curPlayer != myId) { // other player turn
       nextColor = get_next_move()[0];
-      
+
     } else { // our turn
-    
+
       switch(infos[1])
       {
         case '1': // human v. human
