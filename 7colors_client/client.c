@@ -235,6 +235,7 @@ void spectate() {
 /** Sending a play request, and playing if accepted
  */
 void play() {
+  init_client();
   send_play_request();
   char* infos = send_game_type_client();
   char* board = get_initial_board();

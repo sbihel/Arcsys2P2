@@ -17,7 +17,7 @@ int main()
 
   // Spectate
   //spectate();
-  play()
+  play();
 
   return 0; // Everything went well
 }
