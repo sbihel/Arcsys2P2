@@ -136,7 +136,7 @@ void send_next_move(char move) {
   sprintf(buffer, " ");
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
-  } while (!strcmp(buffer, move_request));
+  } while (strcmp(buffer, move_request) != 0);
   buffer[0] = move;
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
   free(buffer);
@@ -153,7 +153,7 @@ char* send_game_type_client() {
   sprintf(buffer, " ");
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
-  } while (!strcmp(buffer, player_request));
+  } while (strcmp(buffer, player_request) != 0);
   char* infos = ask_game_type_client();
   sprintf(buffer, infos);
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
@@ -176,10 +176,10 @@ void send_play_request() {
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
-    if (strcmp(buffer, server_yes)) {
+    if (strcmp(buffer, server_yes) == 0) {
       printf("Server accepted your play request\n");
       break;
-    } else if (strcmp(buffer, server_no)) {
+    } else if (strcmp(buffer, server_no == 0)) {
       printf("Server refused your play request\n");
       printf("Redirecting you to spectating\n");
       spectate();
