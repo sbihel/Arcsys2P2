@@ -38,6 +38,7 @@ void client_to_server(int sfd, void* buff, size_t buff_len, int flags) {
   int wait_time = 1;
   while (i > 0) {
     if (send(sfd, buff, buff_len, flags) > 0) {
+      printf("Sent: %s\n", buff);
       break;
     } else {
       i--;
@@ -138,6 +139,7 @@ void send_next_move(char move) {
   sprintf(buffer, " ");
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
+    printf("| %s | %s |\n", buffer, MOVE_REQUEST);
   } while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);
   buffer[0] = move;
   client_to_server(sfd, buffer, BUFF_SIZE, 0);
@@ -194,7 +196,10 @@ void send_play_request() {
  */
 int i_am_first() {
   char c;
-  server_to_client(sfd, &c, 1, 0);
+  char *buffer = (char *) malloc(BUFF_SIZE);
+  server_to_client(sfd, buffer, 1, 0);
+  c = buffer[0];
+  free(buffer);
   return c;
 }
 

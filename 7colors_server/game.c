@@ -29,8 +29,12 @@ void init_game()
     char *game_type_response = ask_player_game_type();
     // asks the client its role
     game_types[0] = game_type_response[1];
-    depths[0] = game_type_response[2];
-    printf("%s %c%c", game_types, depths[0], depths[1]);
+    char depth_s[2];
+    depth_s[0] = game_type_response[2];
+    depth_s[1] = '\0';
+    depths[0] = atoi(depth_s);
+    printf("%c %d%d", game_types[0], depths[0], depths[1]);
+    free(game_type_response);
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
   } else {
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x00);
@@ -215,7 +219,10 @@ char game(char* board, int* depths, char* game_types)
     char message[2];
     message[0] = nextColor;
     message[1] = curPlayer;
-    update_viewers(message, 2, board, BOARD_SIZE);
+    if(distant_player)
+      update_viewers_but_not_player(message, 2, board, BOARD_SIZE);
+    else
+      update_viewers(message, 2, board, BOARD_SIZE);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
