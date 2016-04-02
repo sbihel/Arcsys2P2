@@ -147,7 +147,8 @@ char game_spectate(char* board)
 /** The main game function, that runs a single game.
  * @param board An initialized board, as given by the server
  * @param order 0 if first to play, 1 otherwise
- * @parem infos about this client player, same format as in send_game_type_client
+ * @param infos about this client player, same format as in
+ *              send_game_type_client
  */
 char game_play(char* board, int order, char* infos)
 {

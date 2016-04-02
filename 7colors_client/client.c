@@ -136,15 +136,15 @@ char* get_next_move() {
  */
 void send_next_move(char move) {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  sprintf(buffer, " ");
-  do {
-    server_to_client(sfd, buffer, BUFF_SIZE, 0);
-    printf("| %s | %s |\n", buffer, MOVE_REQUEST);
-  } while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);
+  /*sprintf(buffer, " ");*/
+  /*do {*/
+    /*server_to_client(sfd, buffer, BUFF_SIZE, 0);*/
+    /*printf("| %s | %s |\n", buffer, MOVE_REQUEST);*/
+  /*} while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);*/
   buffer[0] = move;
-  client_to_server(sfd, buffer, BUFF_SIZE, 0);
+  client_to_server(sfd, buffer, 1, 0);
   free(buffer);
-  }
+}
 
 
 /** Receive messages from server, and when a game_type request is detected,

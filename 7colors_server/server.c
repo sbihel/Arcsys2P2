@@ -331,35 +331,50 @@ void announce_first_player(char firt_player) {
 
 char ask_player_move() {
   printf("HELLLOOW\n");
-  /*sleep(2);*/
-  usleep(50);
+/*  sleep(2);*/
+  /*usleep(50);*/
   char *buffer = (char *) malloc(BUFF_SIZE);
-  sprintf(buffer, MOVE_REQUEST);
-  send(player_socket, buffer, BUFF_SIZE, 0);
-  usleep(10);
-  if(recv(player_socket, buffer, BUFF_SIZE, 0) == -1) {
-    perror("recv");
-    exit(2);
-  }
-  printf("Received: %s", buffer);
-  char response = buffer[0];
-  printf("Da fuck is %d ??", response);
-  fflush(stdout);
-  /*sleep(3);*/
-  if(response < 'A' || response > 'G') {
+  /*sprintf(buffer, MOVE_REQUEST);*/
+  /*if(send(player_socket, buffer, BUFF_SIZE, 0) == -1) {*/
+    /*perror("send");*/
+    /*exit(2);*/
+  /*}*/
+  /*usleep(90);*/
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(player_socket, &readfds);
     struct timeval tv;
-    tv.tv_sec = 2;
+    tv.tv_sec = 3;
     tv.tv_usec = 0;
     if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {
       perror("select");
       exit(1);
     }
     if(FD_ISSET(player_socket, &readfds))
-      recv(player_socket, buffer, BUFF_SIZE, 0);
+  if(recv(player_socket, buffer, BUFF_SIZE, 0) == -1) {
+    perror("recv");
+    exit(2);
   }
+  printf("Received: %s", buffer);
+  char response = buffer[0];
+  printf("Da fuck is %c ??", response);
+  fflush(stdout);
+  sleep(2);
+  /*sleep(3);*/
+  /*if(response < 'A' || response > 'G') {*/
+    /*fd_set readfds;*/
+    /*FD_ZERO(&readfds);*/
+    /*FD_SET(player_socket, &readfds);*/
+    /*struct timeval tv;*/
+    /*tv.tv_sec = 3;*/
+    /*tv.tv_usec = 0;*/
+    /*if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {*/
+      /*perror("select");*/
+      /*exit(1);*/
+    /*}*/
+    /*if(FD_ISSET(player_socket, &readfds))*/
+      /*recv(player_socket, buffer, BUFF_SIZE, 0);*/
+  /*}*/
   free(buffer);
   return response;
 }
