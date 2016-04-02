@@ -325,9 +325,17 @@ char ask_player_move() {
   printf("HELLLOOW\n");
   sleep(2);
   usleep(50);
-  send(player_socket, MOVE_REQUEST, sizeof(MOVE_REQUEST), 0);
-  char response;
+  send(player_socket, &MOVE_REQUEST, sizeof(MOVE_REQUEST), 0);
+  char *buffer = (char *) malloc(BUFF_SIZE);
   usleep(10);
-  recv(player_socket, &response, 1, 0);
+  if(recv(player_socket, buffer, BUFF_SIZE, 0) == -1) {
+    perror("recv");
+    exit(2);
+  }
+  char response = buffer[0];
+  printf("Da fuck is %d ??", response);
+  fflush(stdout);
+  sleep(3);
+  free(buffer);
   return response;
 }

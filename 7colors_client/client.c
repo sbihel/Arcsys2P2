@@ -60,6 +60,7 @@ void server_to_client(int sfd, void* buff, size_t buff_len, int flags) {
   int wait_time = 1;
   while (i > 0) {
     if (recv(sfd, buff, buff_len, flags) > 0) {
+      printf("Received: %s\n", buff);
       break;
     } else {
       i--;
@@ -243,7 +244,29 @@ void play() {
   sleep(1);
   send_play_request();
   char* infos = send_game_type_client();
-  char* board = get_initial_board();
+  char* game_infos = get_initial_board();
+
+  /* Parsing game_infos */
+  char size_string[40];
+  int j = 0;
+  while (game_infos[j] != ' ') {
+    size_string[j] = game_infos[j];
+    j++;
+  }
+  j++;
+  int board_size = atoi(size_string);
+
+  char* board = (char*) malloc (board_size * board_size * sizeof(char));
+  int i = j;
+  for ( ; j < i + board_size * board_size; j++) {
+    board[j-i] = game_infos[j];
+  }
+
+  if (game_infos[++j] != '\0') {
+    printf("Error parsing infos from server\n");
+    exit(1);
+  }
+  free(game_infos);
 
   if ((char) i_am_first() == '0') { // first to play
     game_play(board, 0, infos);
@@ -251,4 +274,5 @@ void play() {
     game_play(board, 1, infos);
   }
 
+  free(board);
 }
