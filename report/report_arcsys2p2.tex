@@ -100,6 +100,20 @@ Côté serveur, le protocole est un peu plus compliqué, puisqu'on veut pouvoir 
 
 \section{Joueurs à distance}
 
+\subsection{Faire jouer des clients}
+
+
+
+\subsection{Robustesse}
+
+Il est possible que lors d'une partie, un joueur déconnecte soudainement ou bien que le serveur tombe en panne. Il faut ainsi ajouter des protocoles de protection pour savoir comment réagir dans ces cas là. \\
+
+Si un spectateur déconnecte pendant la partie, le serveur ne doit pas être perturbé. Il peut cependant signaler par un affichage qu'il a remarqué une déconnexion d'un spectateur. \\
+
+Si un joueur déconnecte \TODO \\
+
+Du point de vue de la partie client, toutes les interactions avec le serveur (avec les fonctions \texttt{send} et \texttt{recv}) sont cachées derrière deux fonctions \texttt{server\_to\_client} et \texttt{client\_to\_server}. Ces fonctions vérifient la valeur de retour, et utilisent une boucle \texttt{while}. Un compteur est initialisé à \texttt{MAX\_SERVER\_MISS} et un temps d'attente à une seconde. Si on ne reçoit rien de valide du serveur (valeur de retour négative ou nulle), on décrémente le compteur, on attend, et on double la valeur du temps d'attente, avant d'entrer dans la prochaine itération de la boucle. Obtenir une réponse positive du serveur fait sortir de la boucle. Une fois le compteur nul, on sort de la boucle, et on quitte le programme en expliquant que le serveur semble être déconnecté. On effectue ainsi \texttt{MAX\_SERVER\_MISS} demandes au serveur, espacées d'un temps qui augmente exponentiellement. Concrètement, cela signifie que si l'on a pas réussi à avoir de connexion avec le serveur au bout de $2^{\texttt{MAX\_SERVER\_MISS}} - 1$ secondes, alors on le considère déconnecté. \\
+
 
 \section{Contraintes imposées par le serveur}
 
