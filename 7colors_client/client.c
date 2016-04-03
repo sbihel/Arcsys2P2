@@ -24,6 +24,7 @@
 #define MOVE_REQUEST "ceciestunerequetedemove"
 #define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
 #define PLAY_REQUEST "iwannaplaydude"
+#define SPECTATE_REQUEST "iwannaspectateman"
 #define SERVER_YES "forsure"
 #define SERVER_NO "nosorrybro"
 
@@ -136,13 +137,16 @@ char* get_next_move() {
  */
 void send_next_move(char move) {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  /*sprintf(buffer, " ");*/
-  /*do {*/
-    /*server_to_client(sfd, buffer, BUFF_SIZE, 0);*/
-    /*printf("| %s | %s |\n", buffer, MOVE_REQUEST);*/
-  /*} while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);*/
-  buffer[0] = move;
-  client_to_server(sfd, buffer, 1, 0);
+  do {
+    printf("checkpoint1\n");
+    printf("%s\n", buffer);
+    server_to_client(sfd, buffer, BUFF_SIZE, 0);
+    printf("%s\n", buffer);
+    printf("| %s | %s |\n", buffer, MOVE_REQUEST);
+  } while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);
+  printf("checkpoint2\n");
+  client_to_server(sfd, &move, 1, 0);
+  printf("checkpoint3\n");
   free(buffer);
 }
 
@@ -174,8 +178,7 @@ char* send_game_type_client() {
  */
 void send_play_request() {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  sprintf(buffer, PLAY_REQUEST);
-  client_to_server(sfd, buffer, BUFF_SIZE, 0);
+  client_to_server(sfd, &PLAY_REQUEST, sizeof(PLAY_REQUEST), 0);
   do {
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
     if (strncmp(buffer, SERVER_YES, sizeof(SERVER_YES)) == 0) {
@@ -191,16 +194,23 @@ void send_play_request() {
 }
 
 
+/** Send a spectate request to server
+ */
+void send_spectate_request() {
+  char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
+  sprintf(buffer, SPECTATE_REQUEST);
+  client_to_server(sfd, buffer, BUFF_SIZE, 0);
+  free(buffer);
+}
+
+
 /** Receive a message from server and return 1
  * if the player is first to play, 0 otherwise
  */
-int i_am_first() {
+int am_i_first() {
   char c;
-  char *buffer = (char *) malloc(BUFF_SIZE);
-  server_to_client(sfd, buffer, 1, 0);
-  c = buffer[0];
-  free(buffer);
-  return c;
+  server_to_client(sfd, &c, 1, 0);
+  return atoi(&c);
 }
 
 
@@ -210,6 +220,8 @@ void spectate() {
 
   /* Getting infos from server */
   init_client();
+  send_spectate_request();
+  
   char* game_infos = get_initial_board();
 
   /* Parsing game_infos */
@@ -273,7 +285,7 @@ void play() {
   }
   free(game_infos);
 
-  if ((char) i_am_first() == '0') { // first to play
+  if ((char) am_i_first() == '0') { // first to play
     game_play(board, 0, infos);
   } else { // second to play
     game_play(board, 1, infos);

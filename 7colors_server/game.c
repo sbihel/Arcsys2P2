@@ -48,8 +48,10 @@ void init_game()
     char* board = malloc(BOARD_SIZE * BOARD_SIZE);
     symmetric_fill_board(board);
     init_viewers(board, BOARD_SIZE);
-    if(distant_player)
+    if(distant_player) {
+      init_player(board, BOARD_SIZE);
       announce_first_player('0');
+    }
     game(board, depths, game_types);
   }
 }
@@ -219,10 +221,7 @@ char game(char* board, int* depths, char* game_types)
     char message[2];
     message[0] = nextColor;
     message[1] = curPlayer;
-    if(distant_player)
-      update_viewers_but_not_player(message, 2, board, BOARD_SIZE);
-    else
-      update_viewers(message, 2, board, BOARD_SIZE);
+    update_viewers(message, 2, board, BOARD_SIZE);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),

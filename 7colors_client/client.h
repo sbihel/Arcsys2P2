@@ -11,6 +11,7 @@ char* get_next_move();
 void send_next_move(char move);
 char* send_game_type_client();
 void send_play_request();
+void send_spectate_request();
 
 int i_am_first();
 

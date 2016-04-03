@@ -12,6 +12,13 @@
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
 #define NB_VIEWERS 999
+
+  /* Contains all client and then send them to viewers or
+   * potentiel_player according to message received
+   */
+int clients[NB_VIEWERS];
+int current_nb_clients = 0;
+
 int viewers[NB_VIEWERS];
 int sfd;
 int current_nb_viewers = 0;
@@ -21,6 +28,7 @@ int potential_player;
 #define MOVE_REQUEST "ceciestunerequetedemove"
 #define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
 #define PLAY_REQUEST "iwannaplaydude"
+#define SPECTATE_REQUEST "iwannaspectateman"
 #define SERVER_YES "forsure"
 #define SERVER_NO "nosorrybro"
 
@@ -34,9 +42,9 @@ int check_messages(char *message, int message_size) {
   FD_ZERO(&readfds);
   FD_SET(sfd, &readfds);
   int max_sfd = sfd;
-  for(int i = 0; i < current_nb_viewers; i++) {
-    FD_SET(viewers[i], &readfds);
-    max_sfd = (max_sfd<viewers[i])?viewers[i]:max_sfd;
+  for(int i = 0; i < current_nb_clients; i++) {
+    FD_SET(clients[i], &readfds);
+    max_sfd = (max_sfd<clients[i])?clients[i]:max_sfd;
   }
   struct timeval tv;
   tv.tv_sec = 2;
@@ -46,16 +54,18 @@ int check_messages(char *message, int message_size) {
     perror("select");
     exit(1);
   }
-  for(int i = 0; i < current_nb_viewers; i++) {
-    if(FD_ISSET(viewers[i], &readfds)) {
-      if(recv(viewers[i], message, message_size, 0) == -1) {
+  for(int i = 0; i < current_nb_clients; i++) {
+    if(FD_ISSET(clients[i], &readfds)) {
+      if(recv(clients[i], message, message_size, 0) == -1) {
         perror("recv");
         exit(2);
       }
-      if(strncmp(message, PLAY_REQUEST, 14) == 0) {
-        printf("Viewer for potential_player: %d\n", viewers[i]);
-        potential_player = viewers[i];
-        return 1;
+      if(strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
+        potential_player = clients[i];
+      }
+      if(strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
+        viewers[current_nb_viewers] = clients[i];
+        current_nb_viewers++;
       }
     }
   }
@@ -63,8 +73,10 @@ int check_messages(char *message, int message_size) {
 }
 
 int init_server() {
-  for(int i = 0; i < NB_VIEWERS; i++)
+  for(int i = 0; i < NB_VIEWERS; i++) {
+    clients[i] = 0;
     viewers[i] = 0;
+  }
   potential_player = 0;
 
   /* Opening socket */
@@ -130,8 +142,8 @@ int init_server() {
       }
 
       printf("Accepted %s\n", client_addr_str);
-      viewers[current_nb_viewers] = clientfd;
-      current_nb_viewers++;
+      clients[current_nb_clients] = clientfd;
+      current_nb_clients++;
 
       char *message = (char*) malloc(1024);
       check_messages(message, 1024);
@@ -155,6 +167,7 @@ void close_server() {
 
 
 void init_player(char *board, int board_size) {
+  printf("INIT_PLAYER\n");
   char size_string[40];
   sprintf(size_string, "%d", board_size);
   char *message = malloc((board_size * board_size + 50) * sizeof(char));
@@ -228,7 +241,7 @@ void init_viewers(char *board, int board_size) {
 
   message[++j] = '\0';
 
-  for(int i = 0; i < NB_VIEWERS; i++) {
+  for(int i = 0; i < current_nb_viewers; i++) {
     send(viewers[i], message, (board_size * board_size + 50) * sizeof(char), 0);
   }
   free(message);
@@ -285,17 +298,6 @@ void update_viewers(char *message, int size_message, char *board,
   }
 }
 
-void update_viewers_but_not_player(char *message, int size_message, char *board,
-    int board_size) {
-  check_new_viewers(board, board_size);
-  for(int i = 0; i < NB_VIEWERS; i++) {
-    if(viewers[i] != player_socket) {
-    send(viewers[i], message, size_message, 0);
-    // TODO remove the viewer if error
-    }
-  }
-}
-
 void accept_player() {
   send(potential_player, SERVER_YES, sizeof(SERVER_YES), 0);
   player_socket = potential_player;
@@ -325,35 +327,43 @@ char* ask_player_game_type() {
 }
 
 // first_player = '0' if distant player plays firt
-void announce_first_player(char firt_player) {
-  send(player_socket, &firt_player, 1, 0);
+void announce_first_player(char first_player) {
+  send(player_socket, &first_player, 1, 0);
 }
 
 char ask_player_move() {
   printf("HELLLOOW\n");
 /*  sleep(2);*/
-  /*usleep(50);*/
+  usleep(50);
   char *buffer = (char *) malloc(BUFF_SIZE);
-  /*sprintf(buffer, MOVE_REQUEST);*/
-  /*if(send(player_socket, buffer, BUFF_SIZE, 0) == -1) {*/
-    /*perror("send");*/
-    /*exit(2);*/
-  /*}*/
-  /*usleep(90);*/
-    fd_set readfds;
-    FD_ZERO(&readfds);
-    FD_SET(player_socket, &readfds);
-    struct timeval tv;
-    tv.tv_sec = 3;
-    tv.tv_usec = 0;
-    if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {
-      perror("select");
-      exit(1);
+  usleep(90);
+  fd_set readfds;
+  FD_ZERO(&readfds);
+  FD_SET(player_socket, &readfds);
+  struct timeval tv;
+  tv.tv_sec = 3;
+  tv.tv_usec = 0;
+  if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {
+    perror("select");
+    exit(1);
+  }
+  if(FD_ISSET(player_socket, &readfds)) {
+    int rc = 0;
+    while (rc != 1) {
+      if (send(player_socket, &MOVE_REQUEST, sizeof(MOVE_REQUEST), 0) == -1) {
+        perror("send");
+        exit(2);
+      }
+      printf("checkpoint1\n");
+      printf("%s\n", buffer);
+      rc = recv(player_socket, buffer, BUFF_SIZE, 0);
+      printf("checkpoint2 - %d\n", rc);
+      printf("%s\n", buffer);
+      if (rc == -1) {
+        perror("recv");
+        exit(2);
+      }
     }
-    if(FD_ISSET(player_socket, &readfds))
-  if(recv(player_socket, buffer, BUFF_SIZE, 0) == -1) {
-    perror("recv");
-    exit(2);
   }
   printf("Received: %s", buffer);
   char response = buffer[0];
