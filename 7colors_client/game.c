@@ -1,5 +1,8 @@
 #include "game.h"
 
+static char *next_color_global_pointer;
+
+
 /** Determine whether game is finished, i.e. a player has more than half of
  * the available cells.
  * @param nb_cells An array containing how many cells each player has. This
@@ -167,68 +170,97 @@ char game_play(char* board, int order, char* infos)
 
   while(!isFinished)
   {
-    char nextColor = 'A';
+    next_color_global_pointer = mmap(NULL, 1, PROT_READ | PROT_WRITE, MAP_SHARED
+        | MAP_ANONYMOUS, -1, 0);
+      // make next_color_global_pointer a shared variable so that child
+      // processes can modify what it points to
+    char *nextColor = next_color_global_pointer;
+    *nextColor = '\0';
 
     if (curPlayer != myId) { // other player turn
-      nextColor = get_next_move()[0];
+      *nextColor = get_next_move()[0];
     } else { // our turn
+      int pid;
+      if((pid = fork()) < 0) {
+        perror("fork");
+        exit(2);
+      } else if (pid == 0) {
+        nextColor = next_color_global_pointer; // Reput the correct address
+        switch(infos[1])
+        {
+          case '1': // human v. human
+            *nextColor = ask(curPlayer);
+            break;
+          case '2': // alphabeta
+            *nextColor = alphabeta_with_depth(board,
+                (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
+            printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
+                *nextColor);
+            break;
+          case '3': // minimax
+            *nextColor = minimax_with_depth(board,
+                (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
+            printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
+                *nextColor);
+            break;
+          case '4': // hegemonic
+            *nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                (curPlayer)?BOARD_SIZE-1:0,
+                (curPlayer)?0:BOARD_SIZE-1,
+                (curPlayer)?-1:1, (curPlayer)?1:-1);
+            printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
+                *nextColor);
+            break;
+          case '5':
+            *nextColor = alphabeta_with_expand_perimeter_depth(board,
+                (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
+            printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n",
+                curPlayer, *nextColor);
+            break;
+          case '6':
+            *nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+            printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+                *nextColor);
+            break;
+          case '7':
+            *nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+            printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+                *nextColor);
+            break;
 
-      switch(infos[1])
-      {
-        case '1': // human v. human
-          nextColor = ask(curPlayer);
-          break;
-        case '2': // alphabeta
-          nextColor = alphabeta_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-                                           infos[2]);
-          printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
-                  nextColor);
-          break;
-        case '3': // minimax
-          nextColor = minimax_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-                                         infos[2]);
-          printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
-                  nextColor);
-          break;
-        case '4': // hegemonic
-          nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-                      (curPlayer)?BOARD_SIZE-1:0,
-                      (curPlayer)?0:BOARD_SIZE-1,
-                      (curPlayer)?-1:1, (curPlayer)?1:-1);
-          printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
-                  nextColor);
-          break;
-        case '5':
-          nextColor = alphabeta_with_expand_perimeter_depth(board,
-                                                  (curPlayer)?SYMBOL_1:SYMBOL_0,
-                                                  infos[1]);
-          printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n",
-              curPlayer, nextColor);
-          break;
-        case '6':
-          nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
-          printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
-                  nextColor);
-          break;
-        case '7':
-          nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
-          printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
-                  nextColor);
-          break;
-
-        default:
-          break;
+          default:
+            break;
+        }
+        while(1) {}
+      } else {
+        int nb_check = 100;
+        for(int c = 0; c < nb_check; c++) {
+          usleep(5000000 / nb_check);  // 5 seconds allowed
+          if(*nextColor != '\0') {
+            break;
+          }
+        }
+        if(*nextColor != '\0') {
+          kill(pid, SIGTERM);
+          send_next_move(*nextColor);
+        } else {
+          kill(pid, SIGTERM);
+          printf("You have to play faster! 5 seconds allowed!\n");
+          char* buffer_next_move = get_next_move();
+          *nextColor = buffer_next_move[0];
+          free(buffer_next_move);
+        }
+        /*munmap(next_color_global_pointer, 1);*/
       }
-      send_next_move(nextColor);
-  }
-
-    if(nextColor < 'A' || nextColor > 'G') {
-      // this is typically a 0x00 returned by alphabeta/minimaxi
-      // let's determine the first available move; if none, then move 'A'.
-      nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
     }
+
+/*    if(*nextColor < 'A' || *nextColor > 'G') {*/
+      /*// this is typically a 0x00 returned by alphabeta/minimaxi*/
+      /*// let's determine the first available move; if none, then move 'A'.*/
+      /**nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);*/
+/*    }*/
     nb_cells[(int) curPlayer] += update_board(board,
-        (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
+        (curPlayer)?SYMBOL_1:SYMBOL_0, *nextColor);
     print_board(board);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",

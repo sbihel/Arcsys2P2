@@ -2,10 +2,13 @@
 #define HAVE_GAME_H
 
 #include <stdbool.h>
+#include <stdlib.h>
+#include <signal.h>
 #include "7colors.h"
 #include "ai.h"
 #include <unistd.h>
 #include "client.h"
+#include <sys/mman.h>
 
 bool is_game_finished(int*);
 

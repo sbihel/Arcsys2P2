@@ -24,7 +24,7 @@ char rand_valid_play(char *board, char player) {
       availMoves += colors_valid[i];
   if(!availMoves)
       return 'A'; // default : we can't do anything
-  
+
   while(!colors_valid[move - 65])
     move = (rand() % 7) + 65;
   return move;
@@ -122,8 +122,8 @@ typedef struct {
   char move;
 } res_minimax;
 
-/** Recursive function for the minimax algorithm. 
- * Returns the best move for the player <code>player</code> according to 
+/** Recursive function for the minimax algorithm.
+ * Returns the best move for the player <code>player</code> according to
  * minimax.
  * @param board The board on which minimax should be run.
  * @param player The player whose turn it is to choose.
@@ -180,17 +180,17 @@ char minimax_with_depth(char *board, char player, int depth) {
   return minimax_through(board, player, player, depth).move;
 }
 
-/** Recursive function for the alphabeta algorithm. 
- * Returns the best move for the player <code>player</code> according to 
+/** Recursive function for the alphabeta algorithm.
+ * Returns the best move for the player <code>player</code> according to
  * alphabeta. Alphabeta's heuristic here is the number of cells for each player
  * (i.e. their score).
  * @param board The board on which alphabeta should be run.
  * @param player The player whose turn it is to choose.
  * @param curPlayer The player alphabeta is currently considering.
  * @param depth The depth to which the alphabeta exploration should go.
- * @param lower_bound The minimal score one can except from the caller's 
+ * @param lower_bound The minimal score one can except from the caller's
  * situation.
- * @param upper_bound The maximal score one can except from the caller's 
+ * @param upper_bound The maximal score one can except from the caller's
  * situation.
  */
 res_minimax alphabeta_through(char *board, char player, char curPlayer,
@@ -258,17 +258,17 @@ char alphabeta_with_depth(char *board, char player, int depth) {
   return alphabeta_through(board, player, player, depth, INT_MIN, INT_MAX).move;
 }
 
-/** Recursive function for the alphabeta algorithm with a hegemonic heuristic. 
- * Returns the best move for the player <code>player</code> according to 
- * alphabeta. Alphabeta's heuristic here is the opponent's available area, 
+/** Recursive function for the alphabeta algorithm with a hegemonic heuristic.
+ * Returns the best move for the player <code>player</code> according to
+ * alphabeta. Alphabeta's heuristic here is the opponent's available area,
  * computed using the hegemonic strategy.
  * @param board The board on which alphabeta should be run.
  * @param player The player whose turn it is to choose.
  * @param curPlayer The player alphabeta is currently considering.
  * @param depth The depth to which the alphabeta exploration should go.
- * @param lower_bound The minimal score one can except from the caller's 
+ * @param lower_bound The minimal score one can except from the caller's
  * situation.
- * @param upper_bound The maximal score one can except from the caller's 
+ * @param upper_bound The maximal score one can except from the caller's
  * situation.
  */
 res_minimax alphabeta_perimeter_through(char *board, char player, char
@@ -332,7 +332,7 @@ res_minimax alphabeta_perimeter_through(char *board, char player, char
   return res;
 }
 
-/** Wrapper function for the alphabeta-hegemonic algorithm. Has default depth 
+/** Wrapper function for the alphabeta-hegemonic algorithm. Has default depth
  * of 6.
  * @param board The current board
  * @param player The player who has to choose

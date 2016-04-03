@@ -210,9 +210,14 @@ char game(char* board, int* depths, char* game_types)
         break;
     }
 
+    bool played_in_time = true;
     if(nextColor < 'A' || nextColor > 'G') {
       // this is typically a 0x00 returned by alphabeta/minimaxi
       // let's determine the first available move; if none, then move 'A'.
+      if(nextColor == '\0' && distant_player && curPlayer == 0) {
+        // Distant player didn't play in time
+        played_in_time = false;
+      }
       nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
     }
     nb_cells[(int) curPlayer] += update_board(board,
@@ -223,6 +228,9 @@ char game(char* board, int* depths, char* game_types)
     message[1] = curPlayer;
     update_viewers(message, 2, board, BOARD_SIZE);
     if(distant_player && curPlayer == 1) {
+      update_player(message, 2);
+    } else if(!played_in_time) {
+      /*usleep(5000);*/
       update_player(message, 2);
     }
 

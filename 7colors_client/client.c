@@ -138,13 +138,13 @@ char* get_next_move() {
  */
 void send_next_move(char move) {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  do {
-    printf("checkpoint1\n");
-    printf("%s\n", buffer);
-    server_to_client(sfd, buffer, BUFF_SIZE, 0);
-    printf("%s\n", buffer);
-    printf("| %s | %s |\n", buffer, MOVE_REQUEST);
-  } while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);
+  /*do {*/
+    /*printf("checkpoint1\n");*/
+    /*printf("%s\n", buffer);*/
+    /*server_to_client(sfd, buffer, BUFF_SIZE, 0);*/
+    /*printf("%s\n", buffer);*/
+    /*printf("| %s | %s |\n", buffer, MOVE_REQUEST);*/
+  /*} while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);*/
   printf("checkpoint2\n");
   client_to_server(sfd, &move, 1, 0);
   printf("checkpoint3\n");
@@ -222,7 +222,7 @@ void spectate() {
   /* Getting infos from server */
   init_client();
   send_spectate_request();
-  
+
   char* game_infos = get_initial_board();
 
   /* Parsing game_infos */
@@ -285,7 +285,7 @@ void play() {
     exit(1);
   }
   free(game_infos);
-  
+
   int first = am_i_first();
   printf("first? %d\n", first);
   if (!first) { // first to play

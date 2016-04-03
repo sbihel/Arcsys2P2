@@ -345,46 +345,37 @@ void announce_first_player(char first_player) {
 char ask_player_move() {
   printf("HELLLOOW\n");
   usleep(100);
-  /*fd_set readfds;
-  FD_ZERO(&readfds);
-  FD_SET(player_socket, &readfds);
-  struct timeval tv;
-  tv.tv_sec = 3;
-  tv.tv_usec = 0;
-  if(FD_ISSET(player_socket, &readfds)) {*/
-  char response;
-    int rc = 0;
-    while (rc != 1) {
-      if (send(player_socket, &MOVE_REQUEST, sizeof(MOVE_REQUEST), 0) == -1) {
-        perror("send");
-        exit(2);
-      }
-      printf("checkpoint1\n");
+  char response = '\0';
+  int rc = 0;
+  while (rc != 1) {
+/*    if (send(player_socket, &MOVE_REQUEST, sizeof(MOVE_REQUEST), 0) == -1) {*/
+      /*perror("send");*/
+      /*exit(2);*/
+    /*}*/
+    printf("checkpoint1\n");
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(player_socket, &readfds);
+    struct timeval tv;
+    tv.tv_sec = 5;
+    tv.tv_usec = 10000;  // Wait a bit more to take account of sending time
+    if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {
+      perror("select");
+      exit(1);
+    }
+    if(FD_ISSET(player_socket, &readfds)) {
       rc = recv(player_socket, &response, 1, 0);
       printf("checkpoint2 - %d\n", rc);
       if (rc == -1) {
         perror("recv");
         exit(2);
       }
+    } else {
+      // The player did not play in time
+      break;
     }
-  //}
+  }
   printf("Da fuck is %c ??", response);
   fflush(stdout);
-  sleep(2);
-  /*sleep(3);*/
-  /*if(response < 'A' || response > 'G') {*/
-    /*fd_set readfds;*/
-    /*FD_ZERO(&readfds);*/
-    /*FD_SET(player_socket, &readfds);*/
-    /*struct timeval tv;*/
-    /*tv.tv_sec = 3;*/
-    /*tv.tv_usec = 0;*/
-    /*if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {*/
-      /*perror("select");*/
-      /*exit(1);*/
-    /*}*/
-    /*if(FD_ISSET(player_socket, &readfds))*/
-      /*recv(player_socket, buffer, BUFF_SIZE, 0);*/
-  /*}*/
   return response;
 }
