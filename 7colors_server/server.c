@@ -184,7 +184,7 @@ void init_player(char *board, int board_size) {
     message[j] = board[k];
     j++;
   }
-  
+
   message[++j] = '\0';
 
   send(player_socket, message, (board_size * board_size + 50) *
@@ -296,6 +296,12 @@ void update_viewers(char *message, int size_message, char *board,
   for(int i = 0; i < NB_VIEWERS; i++) {
     send(viewers[i], message, size_message, 0);
     // TODO remove the viewer if error
+  }
+}
+
+void update_player(char *message, int size_message) {
+  if(player_socket != 0) {
+    send(player_socket, message, size_message, 0);
   }
 }
 

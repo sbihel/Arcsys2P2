@@ -222,6 +222,9 @@ char game(char* board, int* depths, char* game_types)
     message[0] = nextColor;
     message[1] = curPlayer;
     update_viewers(message, 2, board, BOARD_SIZE);
+    if(distant_player && curPlayer == 1) {
+      update_player(message, 2);
+    }
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
