@@ -60,9 +60,10 @@ void client_to_server(int sfd, void* buff, size_t buff_len, int flags) {
 void server_to_client(int sfd, void* buff, size_t buff_len, int flags) {
   int i = MAX_SERVER_MISS;
   int wait_time = 1;
+  int rc;
   while (i > 0) {
-    if (recv(sfd, buff, buff_len, flags) > 0) {
-      printf("Received: %s\n", buff);
+    if ((rc = recv(sfd, buff, buff_len, flags)) > 0) {
+      printf("Received: %s - %d\n", buff, rc);
       break;
     } else {
       i--;
@@ -156,7 +157,6 @@ void send_next_move(char move) {
  */
 char* send_game_type_client() {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  sprintf(buffer, " ");
   do {
     printf("lel3");
     fflush(stdout);
@@ -165,8 +165,7 @@ char* send_game_type_client() {
     fflush(stdout);
   } while (strncmp(buffer, PLAYER_REQUEST, sizeof(PLAYER_REQUEST)) != 0);
   char* infos = ask_game_type_client();
-  sprintf(buffer, infos);
-  client_to_server(sfd, buffer, BUFF_SIZE, 0);
+  client_to_server(sfd, infos, 3, 0);
   free(buffer);
   return infos;
 }
@@ -208,9 +207,11 @@ void send_spectate_request() {
  * if the player is first to play, 0 otherwise
  */
 int am_i_first() {
-  char c;
-  server_to_client(sfd, &c, 1, 0);
-  return atoi(&c);
+  char buff = 'a';
+  printf("it is: %s\n %c\n", &buff, buff);
+  server_to_client(sfd, &buff, 1, 0);
+  printf("received: %s\n %c\n", &buff, buff);
+  return atoi(&buff);
 }
 
 
@@ -284,8 +285,10 @@ void play() {
     exit(1);
   }
   free(game_infos);
-
-  if ((char) am_i_first() == '0') { // first to play
+  
+  int first = am_i_first();
+  printf("first? %d\n", first);
+  if (!first) { // first to play
     game_play(board, 0, infos);
   } else { // second to play
     game_play(board, 1, infos);

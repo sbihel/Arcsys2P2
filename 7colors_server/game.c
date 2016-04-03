@@ -254,8 +254,9 @@ void tournament(char* game_types, int* depths, int nb_games)
   for(i = 0; i < nb_games; i++) {
     symmetric_fill_board(board); // ensure equality between the contestants
     init_viewers(board, BOARD_SIZE);
-    if(distant_player)
-      announce_first_player('1');
+    if(distant_player) {
+      announce_first_player('0');
+    }
     char winner = game(board, depths, game_types);
     res[(int)winner]++;
   }

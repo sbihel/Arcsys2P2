@@ -184,12 +184,13 @@ void init_player(char *board, int board_size) {
     message[j] = board[k];
     j++;
   }
-
+  
   message[++j] = '\0';
 
   send(player_socket, message, (board_size * board_size + 50) *
       sizeof(char), 0);
   free(message);
+  printf("sent: %s\n", message);
 }
 
 void init_viewer(char *board, int board_size, int index_viewer) {
@@ -318,36 +319,34 @@ char* ask_player_game_type() {
   send(player_socket, &PLAYER_REQUEST, sizeof(PLAYER_REQUEST), 0);
   printf("lel2");
   fflush(stdout);
-  char *response = (char *) malloc(BUFF_SIZE);
+  char *response = (char *) malloc (3*sizeof(char));
   if(recv(player_socket, response, 3, 0) == -1) {
     perror("recv");
     exit(2);
   }
+  printf("%c | %c | %c\n", response[0], response[1], response[2]);
   return response;
 }
 
 // first_player = '0' if distant player plays firt
 void announce_first_player(char first_player) {
-  send(player_socket, &first_player, 1, 0);
+  usleep(100);
+  char buff = first_player;
+  send(player_socket, &buff, 1, 0);
+  printf("sent: %c\n", buff);
 }
 
 char ask_player_move() {
   printf("HELLLOOW\n");
-/*  sleep(2);*/
-  usleep(50);
-  char *buffer = (char *) malloc(BUFF_SIZE);
-  usleep(90);
-  fd_set readfds;
+  usleep(100);
+  /*fd_set readfds;
   FD_ZERO(&readfds);
   FD_SET(player_socket, &readfds);
   struct timeval tv;
   tv.tv_sec = 3;
   tv.tv_usec = 0;
-  if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {
-    perror("select");
-    exit(1);
-  }
-  if(FD_ISSET(player_socket, &readfds)) {
+  if(FD_ISSET(player_socket, &readfds)) {*/
+  char response;
     int rc = 0;
     while (rc != 1) {
       if (send(player_socket, &MOVE_REQUEST, sizeof(MOVE_REQUEST), 0) == -1) {
@@ -355,18 +354,14 @@ char ask_player_move() {
         exit(2);
       }
       printf("checkpoint1\n");
-      printf("%s\n", buffer);
-      rc = recv(player_socket, buffer, BUFF_SIZE, 0);
+      rc = recv(player_socket, &response, 1, 0);
       printf("checkpoint2 - %d\n", rc);
-      printf("%s\n", buffer);
       if (rc == -1) {
         perror("recv");
         exit(2);
       }
     }
-  }
-  printf("Received: %s", buffer);
-  char response = buffer[0];
+  //}
   printf("Da fuck is %c ??", response);
   fflush(stdout);
   sleep(2);
@@ -385,6 +380,5 @@ char ask_player_move() {
     /*if(FD_ISSET(player_socket, &readfds))*/
       /*recv(player_socket, buffer, BUFF_SIZE, 0);*/
   /*}*/
-  free(buffer);
   return response;
 }
