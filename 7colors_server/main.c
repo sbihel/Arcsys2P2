@@ -5,7 +5,10 @@
 #include "server.h"
 #include <signal.h>
 
+#define UNUSED(x) (void)(x)
+
 void int_handler(int sig) {
+  UNUSED(sig);  // Suppress warning about sig not being used.
   close_server();
   exit(0);
 }

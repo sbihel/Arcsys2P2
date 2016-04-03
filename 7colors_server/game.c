@@ -33,7 +33,6 @@ void init_game()
     depth_s[0] = game_type_response[2];
     depth_s[1] = '\0';
     depths[0] = atoi(depth_s);
-    printf("%c %d%d", game_types[0], depths[0], depths[1]);
     free(game_type_response);
     ask_game_type(&(game_types[0]), &(depths[0]), (char)0x01);
   } else {

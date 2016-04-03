@@ -122,7 +122,7 @@ int init_server() {
     perror("Listen");
     exit(1);
   }
-  printf("server: waiting for connections...\n");
+  printf("Server: waiting for connections...\n");
 
   /* Accept loop */
   int clientfd;
@@ -193,7 +193,6 @@ void close_server() {
  * @param board_size: Length of a side of the board.
  */
 void init_player(char *board, int board_size) {
-  printf("INIT_PLAYER\n");
   char size_string[40];
   sprintf(size_string, "%d", board_size);
   char *message = malloc((board_size * board_size + 50) * sizeof(char));
@@ -216,7 +215,6 @@ void init_player(char *board, int board_size) {
   send(player_socket, message, (board_size * board_size + 50) *
        sizeof(char), 0);
   free(message);
-  printf("sent: %s\n", message);
 }
 
 
@@ -384,9 +382,7 @@ void update_player(char *message, int size_message) {
 void accept_player() {
   send(potential_player, SERVER_YES, sizeof(SERVER_YES), 0);
   player_socket = potential_player;
-  printf("Accepted player %d\n", player_socket);
-  /*viewers[current_nb_viewers] = player_socket;*/
-  /*current_nb_viewers++;*/
+  printf("Accepted player (socket: %d)\n", player_socket);
 }
 
 
@@ -403,18 +399,13 @@ void reject_player() {
  * Ask which strategy the distant player will use.
  */
 char* ask_player_game_type() {
-  printf("lel1");
-  fflush(stdout);
   usleep(100);
   send(player_socket, &PLAYER_REQUEST, sizeof(PLAYER_REQUEST), 0);
-  printf("lel2");
-  fflush(stdout);
   char *response = (char *) malloc (3*sizeof(char));
   if(recv(player_socket, response, 3, 0) == -1) {
     perror("recv");
     exit(2);
   }
-  printf("%c | %c | %c\n", response[0], response[1], response[2]);
   return response;
 }
 
@@ -428,7 +419,6 @@ void announce_first_player(char first_player) {
   usleep(100);
   char buff = first_player;
   send(player_socket, &buff, 1, 0);
-  printf("sent: %c\n", buff);
 }
 
 
@@ -436,7 +426,6 @@ void announce_first_player(char first_player) {
  * Get the move from the distant player, wait for 5 seconds.
  */
 char ask_player_move() {
-  printf("HELLLOOW\n");
   usleep(100);
   char response = '\0';
   int rc = 0;
@@ -445,7 +434,6 @@ char ask_player_move() {
     /*  perror("send");                                                       */
     /*  exit(2);                                                              */
     /*}                                                                       */
-    printf("checkpoint1\n");
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(player_socket, &readfds);
@@ -458,7 +446,6 @@ char ask_player_move() {
     }
     if(FD_ISSET(player_socket, &readfds)) {
       rc = recv(player_socket, &response, 1, 0);
-      printf("checkpoint2 - %d\n", rc);
       if (rc == -1) {
         perror("recv");
         exit(2);
@@ -468,7 +455,5 @@ char ask_player_move() {
       break;
     }
   }
-  printf("Da fuck is %c ??", response);
-  fflush(stdout);
   return response;
 }

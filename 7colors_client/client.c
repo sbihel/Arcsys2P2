@@ -38,7 +38,7 @@ void client_to_server(int sfd, void* buff, size_t buff_len, int flags) {
   int wait_time = 1;
   while (i > 0) {
     if (send(sfd, buff, buff_len, flags) > 0) {
-      printf("Sent: %s\n", buff);
+      /*printf("Sent: %s\n", buff);*/
       break;
     } else {
       i--;
@@ -62,7 +62,7 @@ void server_to_client(int sfd, void* buff, size_t buff_len, int flags) {
   int rc;
   while (i > 0) {
     if ((rc = recv(sfd, buff, buff_len, flags)) > 0) {
-      printf("Received: %s - %d\n", buff, rc);
+      /*printf("Received: %s - %d\n", buff, rc);*/
       break;
     } else {
       i--;
@@ -138,15 +138,9 @@ char* get_next_move() {
 void send_next_move(char move) {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   /*do {                                                               */
-  /*  printf("checkpoint1\n");                                         */
-  /*  printf("%s\n", buffer);                                          */
   /*  server_to_client(sfd, buffer, BUFF_SIZE, 0);                     */
-  /*  printf("%s\n", buffer);                                          */
-  /*  printf("| %s | %s |\n", buffer, MOVE_REQUEST);                   */
   /*} while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);*/
-  printf("checkpoint2\n");
   client_to_server(sfd, &move, 1, 0);
-  printf("checkpoint3\n");
   free(buffer);
 }
 
@@ -157,11 +151,7 @@ void send_next_move(char move) {
 char* send_game_type_client() {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
   do {
-    printf("lel3");
-    fflush(stdout);
     server_to_client(sfd, buffer, BUFF_SIZE, 0);
-    printf("|| %s || %s ||\n", buffer, PLAYER_REQUEST);
-    fflush(stdout);
   } while (strncmp(buffer, PLAYER_REQUEST, sizeof(PLAYER_REQUEST)) != 0);
   char* infos = ask_game_type_client();
   client_to_server(sfd, infos, 3, 0);
@@ -207,9 +197,7 @@ void send_spectate_request() {
  */
 int am_i_first() {
   char buff = 'a';
-  printf("it is: %s\n %c\n", &buff, buff);
   server_to_client(sfd, &buff, 1, 0);
-  printf("received: %s\n %c\n", &buff, buff);
   return atoi(&buff);
 }
 
@@ -286,7 +274,6 @@ void play() {
   free(game_infos);
 
   int first = am_i_first();
-  printf("first? %d\n", first);
   if (!first) { // first to play
     game_play(board, 0, infos);
   } else { // second to play

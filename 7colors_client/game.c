@@ -174,7 +174,8 @@ char game_play(char* board, int order, char* infos)
                                      | MAP_ANONYMOUS, -1, 0);
     // make next_color_global_pointer a shared variable so that child
     // processes can modify what it points to
-    // We can't use a regular pointer because of virtual memory (if think)
+    // We can't use a regular pointer because of virtual memory (I think)
+    // We're using it through nextColor because of legacy and laziness.
     char *nextColor = next_color_global_pointer;
     *nextColor = '\0';
 
@@ -187,7 +188,8 @@ char game_play(char* board, int order, char* infos)
         perror("fork");
         exit(2);
       } else if (pid == 0) {  // Child process
-        nextColor = next_color_global_pointer; // Reput the correct address
+        nextColor = next_color_global_pointer;
+        // Reput the correct address just to be sure.
         switch(infos[1])
         {
         case '1': // human v. human
@@ -249,7 +251,7 @@ char game_play(char* board, int order, char* infos)
           send_next_move(*nextColor);
         } else {  // Didn't compute the next move
           kill(pid, SIGTERM);
-          printf("You have to play faster! 5 seconds allowed!\n");
+          printf("You have to play faster! Only 5 seconds are allowed!\n");
           // Wait for the server to play for you
           char* buffer_next_move = get_next_move();
           *nextColor = buffer_next_move[0];
