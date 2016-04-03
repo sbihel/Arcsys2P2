@@ -38,6 +38,8 @@
 }
 \newcommand\C[1]{\texttt{#1}}
 
+\setlength{\parskip}{1em}
+
 
 \begin{document}
 
@@ -57,11 +59,22 @@
 \section*{Introduction}
 
 
-Nous avons dans un projet précédent programmé un jeu des 7 couleurs en langage \texttt{C}, permettant à des joueurs humains et des joueurs artificiels de s'affronter. Nous avions pour cela implémenté différentes stratégies utilisables par des intelligences artificielles, et nous avions comparé leurs efficacités à travers un tournoi. \\
+Nous avons dans un projet précédent programmé un jeu des 7 couleurs en langage 
+\texttt{C}, permettant à des joueurs humains et des joueurs artificiels de 
+s'affronter. Nous avions pour cela implémenté différentes stratégies 
+utilisables par des intelligences artificielles, et nous avions comparé leurs 
+efficacités à travers un tournoi.
 
-Mais tel que nous l'avons implémenté, si deux joueurs humains veulent jouer, ils doivent le faire sur la même machine. Si un tiers veut regarder la partie en tant que spectateur, il doit être physiquement présent devant l'écran de la machine sur laquelle tourne le jeu. Ceci est peu pratique, et ne permet pas une diffusion à large échelle des informations. \\
+Mais tel que nous l'avons implémenté, si deux joueurs humains veulent jouer, 
+ils doivent le faire sur la même machine. Si un tiers veut regarder la partie 
+en tant que spectateur, il doit être physiquement présent devant l'écran de la 
+machine sur laquelle tourne le jeu. Ceci est peu pratique, et ne permet pas une 
+diffusion à large échelle des informations.
 
-C'est pourquoi nous allons à travers ce projet modifier notre code source afin de le rendre compatible à une utilisation par un réseau. Le but est de faire tourner le jeu sur un serveur, et d'avoir des clients qui peuvent se connecter au serveur soit pour jouer, soit pour assister au match et le retransmettre. \\
+C'est pourquoi nous allons à travers ce projet modifier notre code source afin 
+de le rendre compatible à une utilisation par un réseau. Le but est de faire 
+tourner le jeu sur un serveur, et d'avoir des clients qui peuvent se connecter 
+au serveur soit pour jouer, soit pour assister au match et le retransmettre.
 
 Dans un premier temps, on s'intéresse à l'ajout de spectateurs, puis on fait jouer des joueurs à distance, et enfin, on modifie le serveur pour qu'il impose des contraintes équitables aux joueurs.
 
@@ -73,7 +86,7 @@ Pour assister à un match en cours sur un serveur, on utilise la fonction \textt
 %
 \begin{itemize}
 	\setlength\itemsep{1em}
-	\item On ouvre une socket client, et on se connecte au serveur.
+	\item On ouvre un socket client, et on se connecte au serveur.
 	\item On reçoit du serveur l'état actuel du jeu, la chaîne de caractère suit le format suivant :
 
 		\bgroup
@@ -88,14 +101,39 @@ Pour assister à un match en cours sur un serveur, on utilise la fonction \textt
 		\egroup
 	
 	\item On lance alors une partie qui démarre de la configuration reçue, en local. Le serveur envoie un coup sous la forme d'une chaîne de deux caractères. Le premier est la valeur du coup (donc une couleur), et le deuxième le symbole du joueur jouant ce coup. On met à jour le jeu local selon ces informations, et on affiche l'état courant du jeu. 
-	\item Lorsque la partie est détectée en local comme étant terminée, on affiche le résultat final, et la socket client se ferme. \\
+	\item Lorsque la partie est détectée en local comme étant terminée, on 
+	affiche le résultat final, et le socket client se ferme. \\
 
 \end{itemize}
 %
 
 
-Côté serveur, le protocole est un peu plus compliqué, puisqu'on veut pouvoir gérer potentiellement plusieurs spectateurs, dont certains qui arrivent en cours de partie.
-\TODO
+Côté serveur, le protocole est un peu plus compliqué, puisqu'on veut pouvoir 
+gérer potentiellement plusieurs spectateurs, dont certains qui arrivent en 
+cours de partie.
+
+Regardons d'abord comment le début d'une partie se déroule.
+\begin{itemize}
+	\item On lance le serveur et attend de recevoir des connections pendant 
+	quelques secondes.
+	\item Lorsqu'on reçoit une connexion, on l'ajoute à un tableau qui garde en 
+	mémoire tous les clients connectés.
+	\item À chaque fois qu'on reçoit une connexion on regarde si on a reçu un 
+	message pour demander à regarder la partie, si c'est le cas alors on ajoute 
+	le dernier client accepté dans un second tableau qui garde en mémoire les 
+	observateurs.
+	\item Une fois qu'on arrête d'attendre, on lance la partie. D'abord on 
+	envoi le plateau initial à tous les observateurs.
+	\item Pour chaque coup joué on envoi la couleur jouée ainsi que le 
+	l'identifiant du joueur qui vient de jouer.
+\end{itemize}
+
+Pour avoir des observateurs qui arrivent en milieu de partie, à chaque fois
+qu'on envoi le coup qui vient d'être joué aux observateurs, on voit si il y a
+une connexion en attente et si ce nouveau client veut regarder la partie alors
+on l'ajoute au tableau des observateurs et on lui envoie l'état actuel du
+plateau.
+
 
 
 \section{Joueurs à distance}
@@ -120,16 +158,50 @@ On souhaite avoir un client qui peut jouer au jeu à distance en se connectant a
 
 \subsection{Robustesse}
 
-Il est possible que lors d'une partie, un joueur déconnecte soudainement ou bien que le serveur tombe en panne. Il faut ainsi ajouter des protocoles de protection pour savoir comment réagir dans ces cas là. \\
+Il est possible que lors d'une partie, un joueur déconnecte soudainement ou 
+bien que le serveur tombe en panne. Il faut ainsi ajouter des protocoles de 
+protection pour savoir comment réagir dans ces cas là.
 
-Si un spectateur déconnecte pendant la partie, le serveur ne doit pas être perturbé. Il peut cependant signaler par un affichage qu'il a remarqué une déconnexion d'un spectateur. \\
+Si un spectateur déconnecte pendant la partie, le serveur ne doit pas être 
+perturbé. Il peut cependant signaler par un affichage qu'il a remarqué une 
+déconnexion d'un spectateur.
 
-Si un joueur déconnecte \TODO \\
+Si un joueur déconnecte \TODO not supported yet
 
-Du point de vue de la partie client, toutes les interactions avec le serveur (avec les fonctions \texttt{send} et \texttt{recv}) sont cachées derrière deux fonctions \texttt{server\_to\_client} et \texttt{client\_to\_server}. Ces fonctions vérifient la valeur de retour, et utilisent une boucle \texttt{while}. Un compteur est initialisé à \texttt{MAX\_SERVER\_MISS} et un temps d'attente à une seconde. Si on ne reçoit rien de valide du serveur (valeur de retour négative ou nulle), on décrémente le compteur, on attend, et on double la valeur du temps d'attente, avant d'entrer dans la prochaine itération de la boucle. Obtenir une réponse positive du serveur fait sortir de la boucle. Une fois le compteur nul, on sort de la boucle, et on quitte le programme en expliquant que le serveur semble être déconnecté. On effectue ainsi \texttt{MAX\_SERVER\_MISS} demandes au serveur, espacées d'un temps qui augmente exponentiellement. Concrètement, cela signifie que si l'on a pas réussi à avoir de connexion avec le serveur au bout de $2^{\texttt{MAX\_SERVER\_MISS}} - 1$ secondes, alors on le considère déconnecté. \\
+Du point de vue de la partie client, toutes les interactions avec le serveur 
+(avec les fonctions \texttt{send} et \texttt{recv}) sont cachées derrière deux 
+fonctions \texttt{server\_to\_client} et \texttt{client\_to\_server}. Ces 
+fonctions vérifient la valeur de retour, et utilisent une boucle 
+\texttt{while}. Un compteur est initialisé à \texttt{MAX\_SERVER\_MISS} et un 
+temps d'attente à une seconde. Si on ne reçoit rien de valide du serveur 
+(valeur de retour négative ou nulle), on décrémente le compteur, on attend, et 
+on double la valeur du temps d'attente, avant d'entrer dans la prochaine 
+itération de la boucle. Obtenir une réponse positive du serveur fait sortir de 
+la boucle. Une fois le compteur nul, on sort de la boucle, et on quitte le 
+programme en expliquant que le serveur semble être déconnecté. On effectue 
+ainsi \texttt{MAX\_SERVER\_MISS} demandes au serveur, espacées d'un temps qui 
+augmente exponentiellement. Concrètement, cela signifie que si l'on a pas 
+réussi à avoir de connexion avec le serveur au bout de 
+$2^{\texttt{MAX\_SERVER\_MISS}} - 1$ secondes, alors on le considère déconnecté.
+
+
+\subsection{Limite de temps}
+
+Calcul du prochain coups dans un precessus fils, au bout d'un certain temps on 
+le tue et on voit si il a réussi a calculé le coup, sinon c'est deja trop tard 
+et on attend le coup joué par le serveur à notre place.
 
 
 \section{Contraintes imposées par le serveur}
+
+
+
+\section{Critique}
+
+Pour une partie il faut avoir 2 threads (pour le serveur comme pour le joueur) 
+avec un qui gère les interactions serveur/client et un autre qui gère le jeu 
+(une sort d'automate). Le thread jeu dors et est réveillé des qu'un des 
+elements du jeu est changé.
 
 
 \section*{Conclusion}
