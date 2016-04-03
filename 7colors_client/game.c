@@ -11,7 +11,7 @@ static char *next_color_global_pointer;
 bool is_game_finished(int nb_cells[])
 {
   return (nb_cells[0] >= BOARD_SIZE * BOARD_SIZE / 2 || nb_cells[1] >=
-      BOARD_SIZE * BOARD_SIZE / 2);
+          BOARD_SIZE * BOARD_SIZE / 2);
 }
 
 
@@ -24,43 +24,43 @@ bool is_game_finished(int nb_cells[])
  */
 void ask_game_type(char* game_types, int* depths, char player_id)
 {
-    printf("How will player %d act ?\n"
-    "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
-    "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n"
-    ">", player_id);
-    char ans;
-    while((ans = getchar()) == '\n' || ans > '7' || ans < '1')
-        printf(">");
+  printf("How will player %d act ?\n"
+      "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
+      "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n"
+      ">", player_id);
+  char ans;
+  while((ans = getchar()) == '\n' || ans > '7' || ans < '1')
+    printf(">");
 
-    game_types[(int)player_id] = ans;
+  game_types[(int)player_id] = ans;
 
-    getchar(); // get rid of the '\n'
+  getchar(); // get rid of the '\n'
 
-    if(ans == '2' || ans == '3' || ans == '5') {
-      int depth;
-      printf("How deep will the search go in the tree ?\n>");
-      scanf("%d", &depth);
-      depths[(int)player_id] = depth;
-      getchar();
-    }
+  if(ans == '2' || ans == '3' || ans == '5') {
+    int depth;
+    printf("How deep will the search go in the tree ?\n>");
+    scanf("%d", &depth);
+    depths[(int)player_id] = depth;
+    getchar();
+  }
 }
 
 /** Ask the player to pick a color. */
 char ask(int curPlayer)
 {
   printf("It's player %d's turn. Which color will they choose ?"
-    " \033[K\n\033[K>",  curPlayer);
+         " \033[K\n\033[K>",  curPlayer);
   char nextColor = getchar();
   while(nextColor == '\n') {  // Player has hit enter instead of a color
     printf("\033[FIt's player %d's turn. Which color will they choose ? "
-        "\033[K\n\033[K>", curPlayer);
+           "\033[K\n\033[K>", curPlayer);
     nextColor = getchar();
   }
   getchar();
   while(nextColor > 'G' || nextColor < 'A') {
     printf("\033[F\033[K");  // clear previous line
     printf("It's player %d's turn. Which color will they choose ?\n\033[K>",
-        curPlayer);
+           curPlayer);
     nextColor = getchar();
     getchar();
   }
@@ -76,12 +76,12 @@ char ask(int curPlayer)
 char* ask_game_type_client()
 {
   printf("How will you act ?\n"
-  "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
-  "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n"
-  ">");
+      "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
+      "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n"
+      ">");
   char ans;
   while((ans = getchar()) == '\n' || ans > '7' || ans < '1')
-      printf(">");
+    printf(">");
   getchar(); // get rid of the '\n'
   char* infos;
   if (ans == '2' || ans == '3' || ans == '5') {
@@ -118,8 +118,8 @@ char game_spectate(char* board)
   printf("\033[2J");  // clear screen
   print_board(board);
   printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
-      (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
-      (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+         (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
 
   while(!isFinished)
   {
@@ -127,19 +127,19 @@ char game_spectate(char* board)
     char nextColor = 'A';
     nextColor = c[0];
     nb_cells[(int) c[1]] += update_board(board,
-        (c[1])?SYMBOL_1:SYMBOL_0, nextColor);
+                                         (c[1])?SYMBOL_1:SYMBOL_0, nextColor);
     print_board(board);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
-        (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
-        (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+           (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+           (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
     if(is_game_finished(nb_cells)) {
       printf("\033[KPlayer %d won with an occupation rate of %.2f%%\n",
-          c[1], (double) 100.0 * nb_cells[(int) c[1]] / (BOARD_SIZE
-            * BOARD_SIZE));
+             c[1], (double) 100.0 * nb_cells[(int) c[1]] / (BOARD_SIZE
+                 * BOARD_SIZE));
       break;
 
-    free(c);
+      free(c);
     }
 
   }
@@ -165,15 +165,16 @@ char game_play(char* board, int order, char* infos)
   printf("\033[2J");  // clear screen
   print_board(board);
   printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
-      (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
-      (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+         (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
 
   while(!isFinished)
   {
     next_color_global_pointer = mmap(NULL, 1, PROT_READ | PROT_WRITE, MAP_SHARED
-        | MAP_ANONYMOUS, -1, 0);
-      // make next_color_global_pointer a shared variable so that child
-      // processes can modify what it points to
+                                     | MAP_ANONYMOUS, -1, 0);
+    // make next_color_global_pointer a shared variable so that child
+    // processes can modify what it points to
+    // We can't use a regular pointer because of virtual memory (if think)
     char *nextColor = next_color_global_pointer;
     *nextColor = '\0';
 
@@ -181,71 +182,75 @@ char game_play(char* board, int order, char* infos)
       *nextColor = get_next_move()[0];
     } else { // our turn
       int pid;
+      // Fork to be able to stop computing the next move after a certain time
       if((pid = fork()) < 0) {
         perror("fork");
         exit(2);
-      } else if (pid == 0) {
+      } else if (pid == 0) {  // Child process
         nextColor = next_color_global_pointer; // Reput the correct address
         switch(infos[1])
         {
-          case '1': // human v. human
-            *nextColor = ask(curPlayer);
-            break;
-          case '2': // alphabeta
-            *nextColor = alphabeta_with_depth(board,
-                (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
-            printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
-                *nextColor);
-            break;
-          case '3': // minimax
-            *nextColor = minimax_with_depth(board,
-                (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
-            printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
-                *nextColor);
-            break;
-          case '4': // hegemonic
-            *nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-                (curPlayer)?BOARD_SIZE-1:0,
-                (curPlayer)?0:BOARD_SIZE-1,
-                (curPlayer)?-1:1, (curPlayer)?1:-1);
-            printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
-                *nextColor);
-            break;
-          case '5':
-            *nextColor = alphabeta_with_expand_perimeter_depth(board,
-                (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
-            printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n",
-                curPlayer, *nextColor);
-            break;
-          case '6':
-            *nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
-            printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
-                *nextColor);
-            break;
-          case '7':
-            *nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
-            printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
-                *nextColor);
-            break;
+        case '1': // human v. human
+          *nextColor = ask(curPlayer);
+          break;
+        case '2': // alphabeta
+          *nextColor = alphabeta_with_depth(board,
+              (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
+          printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
+                 *nextColor);
+          break;
+        case '3': // minimax
+          *nextColor = minimax_with_depth(board,
+              (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
+          printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
+                 *nextColor);
+          break;
+        case '4': // hegemonic
+          *nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                               (curPlayer)?BOARD_SIZE-1:0,
+                               (curPlayer)?0:BOARD_SIZE-1,
+                               (curPlayer)?-1:1, (curPlayer)?1:-1);
+          printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
+                 *nextColor);
+          break;
+        case '5':
+          *nextColor = alphabeta_with_expand_perimeter_depth(board,
+                       (curPlayer)?SYMBOL_1:SYMBOL_0, infos[2] - 48);
+          printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n",
+                 curPlayer, *nextColor);
+          break;
+        case '6':
+          *nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+          printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+                 *nextColor);
+          break;
+        case '7':
+          *nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+          printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+                 *nextColor);
+          break;
 
-          default:
-            break;
+        default:
+          break;
         }
-        while(1) {}
-      } else {
+        for(;;) {   // Wait to be killed
+          pause();  // Pause the process until a signal is catched
+        }
+      } else {  // Parent process
         int nb_check = 100;
         for(int c = 0; c < nb_check; c++) {
-          usleep(5000000 / nb_check);  // 5 seconds allowed
-          if(*nextColor != '\0') {
+          usleep(5000000 / nb_check);  // 5 seconds allowed in total
+          if(*nextColor != '\0') {  // Did the next move have been computed
             break;
           }
         }
-        if(*nextColor != '\0') {
+        if(*nextColor != '\0') {  // Had time to compute the next move
           kill(pid, SIGTERM);
           send_next_move(*nextColor);
-        } else {
+        } else {  // Didn't compute the next move
           kill(pid, SIGTERM);
           printf("You have to play faster! 5 seconds allowed!\n");
+          // Wait for the server to play for you
           char* buffer_next_move = get_next_move();
           *nextColor = buffer_next_move[0];
           free(buffer_next_move);
@@ -254,26 +259,20 @@ char game_play(char* board, int order, char* infos)
       }
     }
 
-/*    if(*nextColor < 'A' || *nextColor > 'G') {*/
-      /*// this is typically a 0x00 returned by alphabeta/minimaxi*/
-      /*// let's determine the first available move; if none, then move 'A'.*/
-      /**nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);*/
-/*    }*/
     nb_cells[(int) curPlayer] += update_board(board,
-        (curPlayer)?SYMBOL_1:SYMBOL_0, *nextColor);
+                                 (curPlayer)?SYMBOL_1:SYMBOL_0, *nextColor);
     print_board(board);
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
-        (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
-        (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+           (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+           (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
     if(is_game_finished(nb_cells)) {
       printf("\033[KPlayer %d won with an occupation rate of %.2f%%\n",
-          curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
-            * BOARD_SIZE));
+             curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
+                 * BOARD_SIZE));
       break;
     }
     curPlayer = (curPlayer + 1) % 2;
-
   }
   return curPlayer;
 }

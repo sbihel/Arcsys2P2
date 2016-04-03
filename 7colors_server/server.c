@@ -13,9 +13,9 @@
 #define PORT_NB "7777"
 #define NB_VIEWERS 999
 
-  /* Contains all client and then send them to viewers or
-   * potentiel_player according to message received
-   */
+/* Contains all client and then send them to viewers or
+ * potential_player according to message received
+ */
 int clients[NB_VIEWERS];
 int current_nb_clients = 0;
 
@@ -33,10 +33,20 @@ int potential_player;
 #define SERVER_NO "nosorrybro"
 
 
+/**
+ * Return true if there is a potential player.
+ */
 bool is_there_potential_player() {
   return potential_player != 0;
 }
 
+
+/**
+ * Check messages to see if there is an incoming viewer or player.
+ *
+ * @param message: Pointer to buffer to use for recv. Legacy system.
+ * @param message_size: Size of the buffer.
+ */
 int check_messages(char *message, int message_size) {
   fd_set readfds;
   FD_ZERO(&readfds);
@@ -72,6 +82,10 @@ int check_messages(char *message, int message_size) {
   return 0;
 }
 
+
+/**
+ * Initialize the server.
+ */
 int init_server() {
   for(int i = 0; i < NB_VIEWERS; i++) {
     clients[i] = 0;
@@ -96,7 +110,7 @@ int init_server() {
   s_sockaddr_in.sin_port = htons(port);
 
   int b = bind(sfd, (const struct sockaddr*) &s_sockaddr_in, sizeof (struct
-        sockaddr_in));
+               sockaddr_in));
   if (b == -1) {
     perror("Binding");
     exit(1);
@@ -128,7 +142,7 @@ int init_server() {
 
     if(res_select) {
       clientfd = accept(sfd, (struct sockaddr *) &client_addr,
-          &client_addr_len);
+                        &client_addr_len);
 
       if (clientfd == -1) {
         perror("Accept");
@@ -157,6 +171,10 @@ int init_server() {
   return 0;
 }
 
+
+/**
+ * Shutdown and close sockets.
+ */
 void close_server() {
   shutdown(sfd, 0);  // Further receives are disallowed
   for(int i = 0; i < NB_VIEWERS; i++)
@@ -166,6 +184,14 @@ void close_server() {
 }
 
 
+/**
+ * Give all the initial information to the distant player.
+ *
+ * Send a string composed of the size of the board, a space, and the board.
+ *
+ * @param board: Array of char representing a 2D square board.
+ * @param board_size: Length of a side of the board.
+ */
 void init_player(char *board, int board_size) {
   printf("INIT_PLAYER\n");
   char size_string[40];
@@ -188,11 +214,21 @@ void init_player(char *board, int board_size) {
   message[++j] = '\0';
 
   send(player_socket, message, (board_size * board_size + 50) *
-      sizeof(char), 0);
+       sizeof(char), 0);
   free(message);
   printf("sent: %s\n", message);
 }
 
+
+/**
+ * Give all the initial information to a certain viewer.
+ *
+ * Send a string composed of the size of the board, a space, and the board.
+ *
+ * @param board: Array of char representing a 2D square board.
+ * @param board_size: Length of a side of the board.
+ * @param index_viewer: Index of the viewer in the array of viewers.
+ */
 void init_viewer(char *board, int board_size, int index_viewer) {
   char size_string[40];
   sprintf(size_string, "%d", board_size);
@@ -214,13 +250,18 @@ void init_viewer(char *board, int board_size, int index_viewer) {
   message[++j] = '\0';
 
   send(viewers[index_viewer], message, (board_size * board_size + 50) *
-      sizeof(char), 0);
+       sizeof(char), 0);
   free(message);
 }
 
 
 /**
- * Send a message with the board's size and the board
+ * Give all the initial information to all viewers.
+ *
+ * Send a string composed of the size of the board, a space, and the board.
+ *
+ * @param board: Array of char representing a 2D square board.
+ * @param board_size: Length of a side of the board.
  */
 void init_viewers(char *board, int board_size) {
   char size_string[40];
@@ -248,50 +289,75 @@ void init_viewers(char *board, int board_size) {
   free(message);
 }
 
+
+/**
+ * Remove a viewer of the viewers array.
+ *
+ * @param index_viewer: Index of the viewer in the viewers array.
+ */
 void remove_viewer(int index_viewer) {
   for(int i = index_viewer; i < current_nb_viewers; i++)
     viewers[i] = viewers[i + 1];
   current_nb_viewers--;
 }
 
+
+/**
+ * Check if there is a new viewer that connected during a game and initialize
+ * him.
+ *
+ * @param board: Array of char representing a square board game.
+ * @param board_size: Length of a side of the board.
+ */
 void check_new_viewers(char *board, int board_size) {
-    fd_set readfds;
-    FD_ZERO(&readfds);
-    FD_SET(sfd, &readfds);
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;  // wait 2.5 seconds before timeout
-    if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
-      perror("select");
+  fd_set readfds;
+  FD_ZERO(&readfds);
+  FD_SET(sfd, &readfds);
+  struct timeval tv;
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+  if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
+    perror("select");
+    exit(1);
+  }
+  if(FD_ISSET(sfd, &readfds)) {
+    struct sockaddr_in client_addr;
+    memset(&client_addr, '0', sizeof (struct sockaddr_in));
+    int clientfd;
+    socklen_t client_addr_len = sizeof(struct sockaddr_in);
+    clientfd = accept(sfd, (struct sockaddr *) &client_addr,
+                      &client_addr_len);
+
+    if (clientfd == -1) {
+      perror("Accept");
       exit(1);
     }
-    if(FD_ISSET(sfd, &readfds)) {
-      struct sockaddr_in client_addr;
-      memset(&client_addr, '0', sizeof (struct sockaddr_in));
-      int clientfd;
-      socklen_t client_addr_len = sizeof(struct sockaddr_in);
-      clientfd = accept(sfd, (struct sockaddr *) &client_addr,
-          &client_addr_len);
 
-      if (clientfd == -1) {
-        perror("Accept");
-        exit(1);
-      }
-
-      char client_addr_str[INET_ADDRSTRLEN];
-      if (!inet_ntop(AF_INET, &client_addr, client_addr_str, INET_ADDRSTRLEN)) {
-        perror("Address");
-        exit(1);
-      }
-
-      viewers[current_nb_viewers] = clientfd;
-      init_viewer(board, board_size, current_nb_viewers);
-      current_nb_viewers++;
+    char client_addr_str[INET_ADDRSTRLEN];
+    if (!inet_ntop(AF_INET, &client_addr, client_addr_str, INET_ADDRSTRLEN)) {
+      perror("Address");
+      exit(1);
     }
+
+    viewers[current_nb_viewers] = clientfd;
+    init_viewer(board, board_size, current_nb_viewers);
+    current_nb_viewers++;
+  }
 }
 
+
+/**
+ * Update viewers with the move that has just been played and check for new
+ * viewers.
+ *
+ * @param message: String that should be sent to viewers as a notice of the
+ * move.
+ * @param message_size: Size of the message.
+ * @param board: Array of char representing a square board game.
+ * @param board_size: Length of a side of the board.
+ */
 void update_viewers(char *message, int size_message, char *board,
-    int board_size) {
+                    int board_size) {
   check_new_viewers(board, board_size);
   for(int i = 0; i < NB_VIEWERS; i++) {
     send(viewers[i], message, size_message, 0);
@@ -299,12 +365,22 @@ void update_viewers(char *message, int size_message, char *board,
   }
 }
 
+/**
+ * Update the distant player with the move that has just been played.
+ *
+ * @param message: String that should be sent to viewers as a notice of the
+ * move.
+ * @param message_size: Size of the message.
+ */
 void update_player(char *message, int size_message) {
   if(player_socket != 0) {
     send(player_socket, message, size_message, 0);
   }
 }
 
+/**
+ * Accept the potential player as the distant player.
+ */
 void accept_player() {
   send(potential_player, SERVER_YES, sizeof(SERVER_YES), 0);
   player_socket = potential_player;
@@ -313,11 +389,19 @@ void accept_player() {
   /*current_nb_viewers++;*/
 }
 
+
+/**
+ * Don't accept the potential_player.
+ */
 void reject_player() {
   send(potential_player, SERVER_NO, sizeof(SERVER_NO), 0);
   potential_player = 0;
 }
 
+
+/**
+ * Ask which strategy the distant player will use.
+ */
 char* ask_player_game_type() {
   printf("lel1");
   fflush(stdout);
@@ -334,7 +418,12 @@ char* ask_player_game_type() {
   return response;
 }
 
-// first_player = '0' if distant player plays firt
+
+/*
+ * Announce the distant player whether he plays first or second. '0' for first.
+ *
+ * @param first_player: Char that should be sent.
+ */
 void announce_first_player(char first_player) {
   usleep(100);
   char buff = first_player;
@@ -342,16 +431,20 @@ void announce_first_player(char first_player) {
   printf("sent: %c\n", buff);
 }
 
+
+/**
+ * Get the move from the distant player, wait for 5 seconds.
+ */
 char ask_player_move() {
   printf("HELLLOOW\n");
   usleep(100);
   char response = '\0';
   int rc = 0;
   while (rc != 1) {
-/*    if (send(player_socket, &MOVE_REQUEST, sizeof(MOVE_REQUEST), 0) == -1) {*/
-      /*perror("send");*/
-      /*exit(2);*/
-    /*}*/
+    /*if (send(player_socket, &MOVE_REQUEST, sizeof(MOVE_REQUEST), 0) == -1) {*/
+    /*  perror("send");                                                       */
+    /*  exit(2);                                                              */
+    /*}                                                                       */
     printf("checkpoint1\n");
     fd_set readfds;
     FD_ZERO(&readfds);

@@ -9,7 +9,7 @@ bool distant_player = false;
 bool is_game_finished(int nb_cells[])
 {
   return (nb_cells[0] >= BOARD_SIZE * BOARD_SIZE / 2 || nb_cells[1] >=
-      BOARD_SIZE * BOARD_SIZE / 2);
+          BOARD_SIZE * BOARD_SIZE / 2);
 }
 
 /** Ask the user for game settings, then play the game according to the settings
@@ -59,13 +59,13 @@ void init_game()
 /** Ask the user for the number of games to play. */
 unsigned int ask_tournament()
 {
-    printf("How many turns will there be ?\nIf there is more than one turn,"
-           " then this is a tournament and stats will be displayed."
-           "\n>");
-    unsigned int ans;
-    scanf("%d", &ans);
-    getchar(); // get rid of the '\n'
-    return ans;
+  printf("How many turns will there be ?\nIf there is more than one turn,"
+         " then this is a tournament and stats will be displayed."
+         "\n>");
+  unsigned int ans;
+  scanf("%d", &ans);
+  getchar(); // get rid of the '\n'
+  return ans;
 }
 
 /** Ask the user for a game type that will apply to a player.
@@ -77,43 +77,43 @@ unsigned int ask_tournament()
  */
 void ask_game_type(char* game_types, int* depths, char player_id)
 {
-    printf("How will player %d act ?\n"
-    "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
-    "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n"
-    ">", player_id);
-    char ans;
-    while((ans = getchar()) == '\n' || ans > '7' || ans < '1')
-        printf(">");
+  printf("How will player %d act ?\n"
+      "[1] Human input | [2] AlphaBeta AI | [3] Minimax AI | [4] Hegemonic AI\n"
+      "[5] AlphaBeta with hegemonic heuristic | [6] Greedy | [7] Random \n"
+      ">", player_id);
+  char ans;
+  while((ans = getchar()) == '\n' || ans > '7' || ans < '1')
+    printf(">");
 
-    game_types[(int)player_id] = ans;
+  game_types[(int)player_id] = ans;
 
-    getchar(); // get rid of the '\n'
+  getchar(); // get rid of the '\n'
 
-    if(ans == '2' || ans == '3' || ans == '5') {
-      int depth;
-      printf("How deep will the search go in the tree ?\n>");
-      scanf("%d", &depth);
-      depths[(int)player_id] = depth;
-      getchar();
-    }
+  if(ans == '2' || ans == '3' || ans == '5') {
+    int depth;
+    printf("How deep will the search go in the tree ?\n>");
+    scanf("%d", &depth);
+    depths[(int)player_id] = depth;
+    getchar();
+  }
 }
 
 /** Ask the player to pick a color. */
 char ask(int curPlayer)
 {
   printf("It's player %d's turn. Which color will they choose ?"
-    " \033[K\n\033[K>",  curPlayer);
+         " \033[K\n\033[K>",  curPlayer);
   char nextColor = getchar();
   while(nextColor == '\n') {  // Player has hit enter instead of a color
     printf("\033[FIt's player %d's turn. Which color will they choose ? "
-        "\033[K\n\033[K>", curPlayer);
+           "\033[K\n\033[K>", curPlayer);
     nextColor = getchar();
   }
   getchar();
   while(nextColor > 'G' || nextColor < 'A') {
     printf("\033[F\033[K");  // clear previous line
     printf("It's player %d's turn. Which color will they choose ?\n\033[K>",
-        curPlayer);
+           curPlayer);
     nextColor = getchar();
     getchar();
   }
@@ -136,78 +136,78 @@ char game(char* board, int* depths, char* game_types)
   printf("\033[2J");  // clear screen
   print_board(board);
   printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
-      (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
-      (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+         (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+         (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
 
   while(!isFinished)
   {
     char nextColor = 'A';
     switch(game_types[(int)curPlayer])
     {
-      case '1': // human v. human
-        if(!distant_player || (int)curPlayer == 1)
-          nextColor = ask(curPlayer);
-        else
-          nextColor = ask_player_move();
-        break;
-      case '2': // alphabeta
-        if(!distant_player || (int)curPlayer == 1)
-          nextColor = alphabeta_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-              depths[(int)curPlayer]);
-        else
-          nextColor = ask_player_move();
-        printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
-                nextColor);
-        break;
-      case '3': // minimax
-        if(!distant_player || (int)curPlayer == 1)
-          nextColor = minimax_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-              depths[(int)curPlayer]);
-        else
-          nextColor = ask_player_move();
-        printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
-                nextColor);
-        break;
-      case '4': // hegemonic
-        if(!distant_player || (int)curPlayer == 1)
-          nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
-              (curPlayer)?BOARD_SIZE-1:0,
-              (curPlayer)?0:BOARD_SIZE-1,
-              (curPlayer)?-1:1, (curPlayer)?1:-1);
-        else
-          nextColor = ask_player_move();
-        printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
-                nextColor);
-        break;
-      case '5':
-        if(!distant_player || (int)curPlayer == 1)
-          nextColor = alphabeta_with_expand_perimeter_depth(board,
-              (curPlayer)?SYMBOL_1:SYMBOL_0,
-              depths[(int)curPlayer]);
-        else
-          nextColor = ask_player_move();
-        printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n", curPlayer,
-                nextColor);
-        break;
-      case '6':
-        if(!distant_player || (int)curPlayer == 1)
-          nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
-        else
-          nextColor = ask_player_move();
-        printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
-                nextColor);
-        break;
-      case '7':
-        if(!distant_player || (int)curPlayer == 1)
-          nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
-        else
-          nextColor = ask_player_move();
-        printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
-                nextColor);
-        break;
+    case '1': // human v. human
+      if(!distant_player || (int)curPlayer == 1)
+        nextColor = ask(curPlayer);
+      else
+        nextColor = ask_player_move();
+      break;
+    case '2': // alphabeta
+      if(!distant_player || (int)curPlayer == 1)
+        nextColor = alphabeta_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                                         depths[(int)curPlayer]);
+      else
+        nextColor = ask_player_move();
+      printf("\033[H\033[KAI %d (alphabeta) played %c\n", curPlayer,
+             nextColor);
+      break;
+    case '3': // minimax
+      if(!distant_player || (int)curPlayer == 1)
+        nextColor = minimax_with_depth(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                                       depths[(int)curPlayer]);
+      else
+        nextColor = ask_player_move();
+      printf("\033[H\033[KAI %d (minimax) played %c\n", curPlayer,
+             nextColor);
+      break;
+    case '4': // hegemonic
+      if(!distant_player || (int)curPlayer == 1)
+        nextColor = hegemon(board, (curPlayer)?SYMBOL_1:SYMBOL_0,
+                            (curPlayer)?BOARD_SIZE-1:0,
+                            (curPlayer)?0:BOARD_SIZE-1,
+                            (curPlayer)?-1:1, (curPlayer)?1:-1);
+      else
+        nextColor = ask_player_move();
+      printf("\033[H\033[KAI %d (hegemonic) played %c\n", curPlayer,
+             nextColor);
+      break;
+    case '5':
+      if(!distant_player || (int)curPlayer == 1)
+        nextColor = alphabeta_with_expand_perimeter_depth(board,
+                    (curPlayer)?SYMBOL_1:SYMBOL_0,
+                    depths[(int)curPlayer]);
+      else
+        nextColor = ask_player_move();
+      printf("\033[H\033[KAI %d (Alphabeta hegemonic) played %c\n", curPlayer,
+             nextColor);
+      break;
+    case '6':
+      if(!distant_player || (int)curPlayer == 1)
+        nextColor = biggest_move(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+      else
+        nextColor = ask_player_move();
+      printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+             nextColor);
+      break;
+    case '7':
+      if(!distant_player || (int)curPlayer == 1)
+        nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
+      else
+        nextColor = ask_player_move();
+      printf("\033[H\033[KAI %d (Greedy) played %c\n", curPlayer,
+             nextColor);
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
 
     bool played_in_time = true;
@@ -221,7 +221,7 @@ char game(char* board, int* depths, char* game_types)
       nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
     }
     nb_cells[(int) curPlayer] += update_board(board,
-        (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
+                                 (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
     print_board(board);
     char message[2];
     message[0] = nextColor;
@@ -235,12 +235,12 @@ char game(char* board, int* depths, char* game_types)
     }
 
     printf("| P0: %.2f%% | P1: %.2f%% |\n\n",
-        (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
-        (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
+           (double) 100.0 * nb_cells[0] / (BOARD_SIZE * BOARD_SIZE),
+           (double) 100.0 * nb_cells[1] / (BOARD_SIZE * BOARD_SIZE));
     if(is_game_finished(nb_cells)) {
       printf("\033[KPlayer %d won with an occupation rate of %.2f%%\n",
-          curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
-            * BOARD_SIZE));
+             curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
+                 * BOARD_SIZE));
       break;
     }
     curPlayer = (curPlayer + 1) % 2;

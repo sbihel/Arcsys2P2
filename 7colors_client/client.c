@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -10,15 +9,15 @@
 #include <errno.h>
 #include "game.h"
 
-  /* BUFF_SIZE is size of char* used to get message from server
-   * Must be longer than size of *_REQUEST and SERVER_*
-   */
+/* BUFF_SIZE is size of char* used to get message from server
+ * Must be longer than size of *_REQUEST and SERVER_*
+ */
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
 #define SERVER_IP "127.0.0.1"
 
-  /* Exiting if server is not responding
-   * after 2^(MAX_SERVER_MISS) - 1 seconds */
+/* Exiting if server is not responding
+ * after 2^(MAX_SERVER_MISS) - 1 seconds */
 #define MAX_SERVER_MISS 3
 
 #define MOVE_REQUEST "ceciestunerequetedemove"
@@ -92,17 +91,17 @@ int init_client() {
   struct sockaddr_in serv_addr;
   memset(&serv_addr, '0', sizeof (struct sockaddr_in));
   serv_addr.sin_family = AF_INET;
-    /* Port */
+  /* Port */
   uint16_t port = (uint16_t) atoi(PORT_NB);
   serv_addr.sin_port = htons(port);
-    /* Server address */
+  /* Server address */
   if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) == -1) {
     perror("Inet_pton");
     exit(1);
   }
 
   int c = connect(sfd, (const struct sockaddr*) &serv_addr, sizeof (struct
-        sockaddr_in));
+                  sockaddr_in));
   if (c == -1) {
     perror("Connect");
     exit(1);
@@ -138,12 +137,12 @@ char* get_next_move() {
  */
 void send_next_move(char move) {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));
-  /*do {*/
-    /*printf("checkpoint1\n");*/
-    /*printf("%s\n", buffer);*/
-    /*server_to_client(sfd, buffer, BUFF_SIZE, 0);*/
-    /*printf("%s\n", buffer);*/
-    /*printf("| %s | %s |\n", buffer, MOVE_REQUEST);*/
+  /*do {                                                               */
+  /*  printf("checkpoint1\n");                                         */
+  /*  printf("%s\n", buffer);                                          */
+  /*  server_to_client(sfd, buffer, BUFF_SIZE, 0);                     */
+  /*  printf("%s\n", buffer);                                          */
+  /*  printf("| %s | %s |\n", buffer, MOVE_REQUEST);                   */
   /*} while (strncmp(buffer, MOVE_REQUEST, sizeof(MOVE_REQUEST)) != 0);*/
   printf("checkpoint2\n");
   client_to_server(sfd, &move, 1, 0);
