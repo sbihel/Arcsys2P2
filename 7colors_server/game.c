@@ -1,6 +1,8 @@
 #include "game.h"
 bool distant_player = false;
 
+double time_used[2];
+
 /** Determine whether game is finished, i.e. a player has more than half of
  * the available cells.
  * @param nb_cells An array containing how many cells each player has. This
@@ -141,6 +143,8 @@ char game(char* board, int* depths, char* game_types)
   while(!isFinished)
   {
     char nextColor = 'A';
+    struct timeval start_time, stop_time;
+    gettimeofday(&start_time, NULL);
     switch(game_types[(int)curPlayer])
     {
     case '1': // human v. human
@@ -219,6 +223,10 @@ char game(char* board, int* depths, char* game_types)
       }
       nextColor = rand_valid_play(board, (curPlayer)?SYMBOL_1:SYMBOL_0);
     }
+    gettimeofday(&stop_time, NULL);
+    time_used[(int) curPlayer] += (stop_time.tv_sec - start_time.tv_sec);
+    time_used[(int) curPlayer] += (stop_time.tv_usec - start_time.tv_usec) /
+                                  1000000.0;
     nb_cells[(int) curPlayer] += update_board(board,
                                  (curPlayer)?SYMBOL_1:SYMBOL_0, nextColor);
     print_board(board);
@@ -240,6 +248,8 @@ char game(char* board, int* depths, char* game_types)
       printf("\033[KPlayer %d won with an occupation rate of %.2f%%\n",
              curPlayer, (double) 100.0 * nb_cells[(int) curPlayer] / (BOARD_SIZE
                  * BOARD_SIZE));
+      printf("Total time used for computing next move: player 0 -> %.2fs"
+             " | player 1 -> %.2fs\n", time_used[0], time_used[1]);
       break;
     }
     curPlayer = (curPlayer + 1) % 2;
