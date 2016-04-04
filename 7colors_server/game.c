@@ -237,7 +237,6 @@ char game(char* board, int* depths, char* game_types)
     if(distant_player && curPlayer == 1) {
       update_player(message, 2);
     } else if(!played_in_time) {
-      /*usleep(5000);*/
       update_player(message, 2);
     }
 

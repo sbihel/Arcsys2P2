@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "server.h"
 
@@ -312,6 +313,18 @@ void remove_viewer(int index_viewer) {
 
 
 /**
+ * Remove a client of the clients array.
+ *
+ * @param index_client : Index of the client in the clients array.
+ */
+void remove_client(int index_client) {
+  for(int i = index_client; i < current_nb_clients; i++)
+    clients[i] = clients[i + 1];
+  current_nb_clients--;
+}
+
+
+/**
  * Check if there is a new viewer that connected during a game and initialize
  * him.
  *
@@ -381,11 +394,21 @@ void check_new_viewers(char *board, int board_size) {
 void update_viewers(char *message, int size_message, char *board,
                     int board_size) {
   check_new_viewers(board, board_size);
-  for(int i = 0; i < NB_VIEWERS; i++) {
-    send(viewers[i], message, size_message, 0);
-    // TODO remove the viewer if error
+  for(int i = 0; i < current_nb_viewers; i++) {
+    sigignore(SIGPIPE);
+    // Avoid dying on the signal that says that the other socket has closed.
+    // MSG_NOSIGNAL flag for send doens't work on OS X
+    if((send(viewers[i], message, size_message, 0)) == -1) {
+      remove_viewer(i);
+      for(int j = 0; i < current_nb_clients; j++) {
+        if(clients[j] == viewers[i]) {
+          remove_client(j);
+        }
+      }
+    }
   }
 }
+
 
 /**
  * Update the distant player with the move that has just been played.
@@ -396,7 +419,13 @@ void update_viewers(char *message, int size_message, char *board,
  */
 void update_player(char *message, int size_message) {
   if(player_socket != 0) {
-    send(player_socket, message, size_message, 0);
+    sigignore(SIGPIPE);
+    // Avoid dying on the signal that says that the other socket has closed.
+    // MSG_NOSIGNAL flag for send doens't work on OS X
+    if((send(player_socket, message, size_message, 0) == -1)) {
+      printf("Distant player disconnected.\n");
+      exit(0);
+    }
   }
 }
 
@@ -463,7 +492,7 @@ char ask_player_move() {
     FD_SET(player_socket, &readfds);
     struct timeval tv;
     tv.tv_sec = 5;
-    tv.tv_usec = 10000;  // Wait a bit more to take account of sending time
+    tv.tv_usec = 5000;  // Wait a bit more to take account of sending time
     if (select(player_socket+1, &readfds, NULL, NULL, &tv) < 0) {
       perror("select");
       exit(1);
@@ -473,6 +502,10 @@ char ask_player_move() {
       if (rc == -1) {
         perror("recv");
         exit(2);
+      } else if (rc == 0) {
+        // When player disconnect, its socket becomes readable
+        printf("Distant player disconnected.\n");
+        exit(0);
       }
     } else {
       // The player did not play in time
