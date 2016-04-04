@@ -202,9 +202,19 @@ Les résultats nous ont permis d'affiner la robustesse, jusqu'à arriver à des 
 
 \subsection{Limite de temps}
 
-Calcul du prochain coups dans un precessus fils, au bout d'un certain temps on 
-le tue et on voit si il a réussi a calculé le coup, sinon c'est deja trop tard 
-et on attend le coup joué par le serveur à notre place.
+Une limite de temps pour le joueur distant a aussi été implémentée. Côté 
+serveur, on attend 5 secondes pour recevoir le coup du joueur distant et si 
+aucun coup n'a été reçu, alors on joue à sa place. Après avoir joué à sa place, 
+on envoie le coup choisi au joueur distant.
+
+Côté joueur distant, on utilise un \texttt{fork}. Dans le processus fils on 
+lance le calcul du prochain coup (algorithme alpha-beta ou demande d'input par 
+exemple). Une fois le calcul fait, on pause le processus infiniment. Dans le 
+processus père, on attend 5 secondes en vérifiant régulièrement si le coup a 
+été calculé. Une fois qu'on a attendu 5 secondes ou que le coup a été calculé, 
+on tue le processus fils. Ensuite, si le coup a été calculé, on envoie le coup 
+au serveur, sinon il est déjà trop tard et on attend de recevoir le coup qui a 
+été joué à notre place par le serveur.
 
 
 
