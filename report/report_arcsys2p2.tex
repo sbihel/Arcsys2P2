@@ -135,6 +135,14 @@ cours de partie. \\
 	l'identifiant du joueur qui vient de jouer. \\
 \end{itemize}
 
+%
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{viewer.png}
+	\caption{Protocole spectateur}
+\end{figure}
+%
+
 \noindent Pour avoir des observateurs qui arrivent en milieu de partie, à chaque fois
 qu'on envoie le coup qui vient d'être joué aux observateurs, on voit s'il y a
 une connexion en attente et si ce nouveau client veut regarder la partie. Si c'est le cas, alors 
@@ -168,6 +176,15 @@ On souhaite avoir un client qui peut jouer au jeu à distance en se connectant a
 	%son coup suivant, et il l'envoie au serveur. \TODO
 	\item Le serveur envoie au client les coups de l'adversaire, pour qu'il puisse mettre à jour sa version locale du jeu.
 \end{itemize}
+%
+
+%
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{playeryes.png} \hspace{1cm}
+	\includegraphics[scale=0.6]{playerno.png}
+	\caption{Protocole joueur à distance, selon la réponse du serveur}
+\end{figure}
 %
 
 
