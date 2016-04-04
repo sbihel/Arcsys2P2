@@ -52,9 +52,9 @@
 
 \maketitle
 
-\resume{\TODO}\\
+\resume{Ce projet consiste à porter le jeu des 7 couleurs sur un serveur. Ainsi, des clients pourront se connecter au serveur pour assister à la partie et la retransmettre, ou bien pour jouer à distance.}\\
 
-\keywords{\TODO}
+\keywords{Serveur ; Client ; Socket ; Réseau}
 
 \section*{Introduction}
 
@@ -85,8 +85,9 @@ Pour assister à un match en cours sur un serveur, on utilise la fonction \textt
 
 %
 \begin{itemize}
-	\setlength\itemsep{1em}
+	\setlength\itemsep{0.5em}
 	\item On ouvre un socket client, et on se connecte au serveur.
+	\item On envoie une requête \texttt{SPECTATE\_REQUEST} pour signifier au serveur qu'on se connecte en tant que spectateur.
 	\item On reçoit du serveur l'état actuel du jeu, la chaîne de caractère suit le format suivant :
 
 		\bgroup
@@ -108,29 +109,30 @@ Pour assister à un match en cours sur un serveur, on utilise la fonction \textt
 %
 
 
-Côté serveur, le protocole est un peu plus compliqué, puisqu'on veut pouvoir 
+\noindent Côté serveur, le protocole est un peu plus compliqué, puisqu'on veut pouvoir 
 gérer potentiellement plusieurs spectateurs, dont certains qui arrivent en 
-cours de partie.
+cours de partie. \\
 
-Regardons d'abord comment le début d'une partie se déroule.
+\noindent Regardons d'abord comment le début d'une partie se déroule.
 \begin{itemize}
+	\setlength\itemsep{0.5em}
 	\item On lance le serveur et attend de recevoir des connections pendant 
 	quelques secondes.
 	\item Lorsqu'on reçoit une connexion, on l'ajoute à un tableau qui garde en 
 	mémoire tous les clients connectés.
-	\item À chaque fois qu'on reçoit une connexion on regarde si on a reçu un 
-	message pour demander à regarder la partie, si c'est le cas alors on ajoute 
+	\item À chaque fois qu'on reçoit une connexion, on regarde si on a reçu un 
+	message pour demander à regarder la partie (\texttt{SPECTATE\_REQUEST}), si c'est le cas alors on ajoute 
 	le dernier client accepté dans un second tableau qui garde en mémoire les 
 	observateurs.
 	\item Une fois qu'on arrête d'attendre, on lance la partie. D'abord on 
-	envoi le plateau initial à tous les observateurs.
-	\item Pour chaque coup joué on envoi la couleur jouée ainsi que le 
-	l'identifiant du joueur qui vient de jouer.
+	envoie le plateau initial à tous les observateurs.
+	\item Pour chaque coup joué on envoie la couleur jouée ainsi que le 
+	l'identifiant du joueur qui vient de jouer. \\
 \end{itemize}
 
-Pour avoir des observateurs qui arrivent en milieu de partie, à chaque fois
-qu'on envoi le coup qui vient d'être joué aux observateurs, on voit si il y a
-une connexion en attente et si ce nouveau client veut regarder la partie alors
+\noindent Pour avoir des observateurs qui arrivent en milieu de partie, à chaque fois
+qu'on envoie le coup qui vient d'être joué aux observateurs, on voit s'il y a
+une connexion en attente et si ce nouveau client veut regarder la partie. Si c'est le cas, alors 
 on l'ajoute au tableau des observateurs et on lui envoie l'état actuel du
 plateau.
 
