@@ -401,12 +401,12 @@ void update_viewers(char *message, int size_message, char *board,
     // Avoid dying on the signal that says that the other socket has closed.
     // MSG_NOSIGNAL flag for send doens't work on OS X
     if((send(viewers[i], message, size_message, 0)) == -1) {
-      remove_viewer(i);
-      for(int j = 0; i < current_nb_clients; j++) {
+      for(int j = 0; j < current_nb_clients; j++) {
         if(clients[j] == viewers[i]) {
           remove_client(j);
         }
       }
+      remove_viewer(i);
     }
   }
 }
