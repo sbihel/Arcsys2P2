@@ -152,13 +152,13 @@ On souhaite avoir un client qui peut jouer au jeu à distance en se connectant a
 
 %
 \begin{itemize}
-	\setlength\itemsep{1em}
-	\item Le client envoie au serveur un code spécifique signifiant qu'il veut jouer, c'est une requête pour jouer.
+	\setlength\itemsep{0.5em}
+	\item Le client envoie au serveur un code spécifique signifiant qu'il veut jouer, c'est une requête pour jouer (\texttt{PLAY\_REQUEST}).
 	\item Il reçoit la réponse du serveur. Si c'est non (typiquement si la partie est déjà commencée, où s'il y a déjà deux joueurs), alors la demande est refusée, et le client est basculé en mode spectateur. Si la réponse est oui, la demande est acceptée, et le serveur a enregistré le client comme étant joueur.
 	\item Le client reçoit une demande de stratégie du serveur. Il choisit sa stratégie, et l'envoie au serveur.
 	\item Le serveur envoie ensuite le tableau initial du jeu, pour commencer à jouer.
 	\item Le serveur envoie au client l'information suivante : est-ce que le client joue en premier ou non ?
-	\item Le jeu tourne sur le serveur, et celui-ci envoie des requêtes de coup au client lorsque c'est nécessaire. Le client fait tourner en local un jeu afin de pouvoir calculer son coup suivant, et il l'envoie au serveur.
+	\item Le jeu tourne sur le serveur, et celui-ci envoie des requêtes de coup au client lorsque c'est nécessaire. Le client fait tourner en local un jeu afin de pouvoir calculer son coup suivant, et il l'envoie au serveur. \TODO
 	\item Le serveur envoie au client les coups de l'adversaire, pour qu'il puisse mettre à jour sa version locale du jeu.
 \end{itemize}
 %
@@ -173,8 +173,10 @@ protection pour savoir comment réagir dans ces cas là.
 Si un spectateur déconnecte pendant la partie, le serveur ne doit pas être 
 perturbé. Il peut cependant signaler par un affichage qu'il a remarqué une 
 déconnexion d'un spectateur.
+Plusieurs nouveaux spectateurs peuvent être acceptées à chaque tour du jeu. On accepte un nombre maximum de spectateurs, fixé au départ.
+Ainsi, on ne peut pas faire crasher le serveur en envoyant une infinité de spectateurs. \\
 
-Si un joueur déconnecte \TODO not supported yet
+Si un joueur déconnecte, le serveur va fermer dès qu'il voudra lui envoyer un message. \\
 
 Du point de vue de la partie client, toutes les interactions avec le serveur 
 (avec les fonctions \texttt{send} et \texttt{recv}) sont cachées derrière deux 
@@ -209,7 +211,10 @@ et on attend le coup joué par le serveur à notre place.
 Pour une partie il faut avoir 2 threads (pour le serveur comme pour le joueur) 
 avec un qui gère les interactions serveur/client et un autre qui gère le jeu 
 (une sort d'automate). Le thread jeu dors et est réveillé des qu'un des 
-elements du jeu est changé.
+elements du jeu est changé. \\
+
+
+On pourrait améliorer la robustesse de notre serveur en essayant de contrer des attaques par déni de service (DoS). On pourrait par exemple utiliser l'algorithme du CountMin Sketch que nous avons programmé lors d'un projet en module d'IRESI. \\
 
 
 \section*{Conclusion}
