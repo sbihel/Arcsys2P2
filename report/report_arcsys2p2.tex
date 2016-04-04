@@ -96,7 +96,7 @@ Pour assister à un match en cours sur un serveur, on utilise la fonction \textt
 	\item On reçoit du serveur l'état actuel du jeu, la chaîne de caractère suit le format suivant :
 
 		\bgroup
-		\def\arraystretch{1.5}
+		\def\arraystretch{1.2}
 		\begin{center}
 		\begin{tabular}{|c|c|}
 			\hline 
@@ -121,7 +121,7 @@ cours de partie. \\
 \noindent Regardons d'abord comment le début d'une partie se déroule.
 \begin{itemize}
 	\setlength\itemsep{0.5em}
-	\item On lance le serveur et attend de recevoir des connections pendant 
+	\item On lance le serveur et attend de recevoir des connexions pendant 
 	quelques secondes.
 	\item Lorsqu'on reçoit une connexion, on l'ajoute à un tableau qui garde en 
 	mémoire tous les clients connectés.
@@ -129,9 +129,9 @@ cours de partie. \\
 	message pour demander à regarder la partie (\texttt{SPECTATE\_REQUEST}), si c'est le cas alors on ajoute 
 	le dernier client accepté dans un second tableau qui garde en mémoire les 
 	observateurs.
-	\item Une fois qu'on arrête d'attendre, on lance la partie. D'abord on 
+	\item Une fois qu'on arrête d'attendre, on lance la partie. D'abord, on 
 	envoie le plateau initial à tous les observateurs.
-	\item Pour chaque coup joué on envoie la couleur jouée ainsi que le 
+	\item Pour chaque coup joué on envoie la couleur jouée ainsi que  
 	l'identifiant du joueur qui vient de jouer. \\
 \end{itemize}
 
@@ -139,7 +139,7 @@ cours de partie. \\
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.6]{viewer.png}
-	\caption{Protocole spectateur}
+	\caption{Protocole Serveur - Spectateur}
 \end{figure}
 %
 
@@ -170,10 +170,6 @@ On souhaite avoir un client qui peut jouer au jeu à distance en se connectant a
 	de jouer, le serveur attend automatiquement le coup du joueur. De son côté, 
 	le client fait tourner en local un jeu afin de pouvoir calculer son coup 
 	suivant, et il l'envoie au serveur.
-	%, et celui-ci envoie des requêtes de coup au client lorsque c'est 
-	%nécessaire. Le client fait tourner en local un jeu afin de pouvoir 
-	%calculer 
-	%son coup suivant, et il l'envoie au serveur. \TODO
 	\item Le serveur envoie au client les coups de l'adversaire, pour qu'il puisse mettre à jour sa version locale du jeu.
 \end{itemize}
 %
@@ -183,7 +179,7 @@ On souhaite avoir un client qui peut jouer au jeu à distance en se connectant a
 	\centering
 	\includegraphics[scale=0.6]{playeryes.png} \hspace{1cm}
 	\includegraphics[scale=0.6]{playerno.png}
-	\caption{Protocole joueur à distance, selon la réponse du serveur}
+	\caption{Protocole Serveur - Joueur à distance}
 \end{figure}
 %
 
@@ -197,7 +193,7 @@ protection pour savoir comment réagir dans ces cas là.
 Si un spectateur déconnecte pendant la partie, le serveur ne doit pas être 
 perturbé. Il peut cependant signaler par un affichage qu'il a remarqué une 
 déconnexion d'un spectateur.
-Plusieurs nouveaux spectateurs peuvent être acceptées à chaque tour du jeu. On accepte un nombre maximum de spectateurs, fixé au départ.
+Plusieurs nouveaux spectateurs peuvent être acceptés à chaque tour du jeu. On accepte un nombre maximum de spectateurs, fixé au départ.
 Ainsi, on ne peut pas faire crasher le serveur en envoyant une infinité de spectateurs. \\
 
 Si un joueur déconnecte, le serveur va fermer dès qu'il voudra lui envoyer un message. \\
@@ -227,11 +223,11 @@ Les résultats nous ont permis d'affiner la robustesse, jusqu'à arriver à des 
 \subsection{Limite de temps}
 
 Une limite de temps pour le joueur distant a aussi été implémentée. Côté 
-serveur, on attend 5 secondes pour recevoir le coup du joueur distant et si 
+serveur, on attend 5 secondes pour recevoir le coup du joueur distant, et si 
 aucun coup n'a été reçu, alors on joue à sa place. Après avoir joué à sa place, 
 on envoie le coup choisi au joueur distant.
 
-Côté joueur distant, on utilise un \texttt{fork}. Dans le processus fils on 
+Côté joueur distant, on utilise un \texttt{fork}. Dans le processus fils, on 
 lance le calcul du prochain coup (algorithme alpha-beta ou demande d'input par 
 exemple). Une fois le calcul fait, on pause le processus infiniment. Dans le 
 processus père, on attend 5 secondes en vérifiant régulièrement si le coup a 
@@ -240,35 +236,35 @@ on tue le processus fils. Ensuite, si le coup a été calculé, on envoie le cou
 au serveur, sinon il est déjà trop tard et on attend de recevoir le coup qui a 
 été joué à notre place par le serveur.
 
-Concernant la chronométrage des deux joueurs, on prend le temps avant de 
-lancer/demander le coup suivant et on reprend le temps une fois qu'on a le 
-coup. La différence des deux donne le temps pris, et additionne au fil des 
+Concernant le chronométrage des deux joueurs, on note le temps avant de 
+lancer/demander le coup suivant et on relève le temps une fois qu'on a le 
+coup. La différence des deux donne la durée prise, et on additionne au fil des 
 tours. On a utilisé des \texttt{struct timeval} et la fonction 
 \texttt{gettimeofday} pour avoir le temps écoulé depuis l'Epoch.
 
 
 
-\section{Critique}
+\section{Améliorations envisageables}
 
-Actuellement, on est parti d'une version locale du jeu de 7colors en ajoutant
+Actuellement, Nous sommes partis d'une version locale du jeu des 7 couleurs en ajoutant
 des interactions serveur/client(s) dans le déroulement d'une partie. Cela peut
 encore marcher pour un serveur qui fait une seule partie d'un jeu simple.
-Cependant si le jeu avait besoin de plus d'interactions, une mauvais ordre dans
-les messages incapaciterait le client. Côté serveur il serait impossible de
+Cependant, si le jeu avait besoin de plus d'interactions, un mauvais ordre dans
+les messages rendrait le serveur inapte à remplir son rôle. Côté serveur, il serait impossible de
 gérer plusieurs parties sans avoir des dépendances entre elles. Il faudrait donc
 séparer interactions réseaux et jeu. Il y aurait donc un thread dédié au réseau,
-et un thread par partie du jeu. Au final le déroulement d'une partie ne serait
-rien d'autre qu'un automate. Pour la gestion réseau on pourrait avoir une queue
+et un thread par partie du jeu. Au final, le déroulement d'une partie ne serait
+rien d'autre qu'un automate. Pour la gestion réseau, on pourrait avoir une file
 pour stocker un certain nombre de messages et les traiter dans un ordre
 approprié. On pourrait aussi avoir un thread en plus pour ne faire qu'écouter et
-mettre les messages dans la queue. Chaque partie aurait un identifiant et chaque
-message contiendrait un identifiant pour connaitre son rôle facilement. Il
+mettre les messages dans la file. Chaque partie aurait un identifiant et chaque
+message contiendrait un identifiant pour connaître son rôle facilement. Il
 faudrait un moyen de définir quels messages sont attendus pour permettre à
 l'automate/thread de jeu de dormir et de ne le réveiller que lorsqu'un élément
 fait avancer la partie.
 
 
-Pour le joueur distant il faudrait attendre une demande du serveur pour choisir 
+Pour le joueur distant, il faudrait attendre une demande du serveur pour choisir 
 une couleur avant de lancer les calculs et envoyer le coup effectué.
 
 On pourrait améliorer la robustesse de notre serveur en essayant de contrer des 
@@ -286,7 +282,7 @@ de jouer à distance n'est offerte qu'à un seul joueur. On pourrait modifier le
 programme pour avoir deux joueurs distants. Par ailleurs, le programme est 
 fonctionnel pour un round, on pourrait sans difficulté l'adapter pour un 
 tournoi, en réinitialisant les joueurs distants et les spectateurs à chaque 
-nouveau round. Enfin, on pourrai améliorer le protocole afin d'améliorer les 
+nouveau round. Enfin, on pourrait affiner le protocole afin d'améliorer les 
 performances et la robustesse du serveur.
 
 
