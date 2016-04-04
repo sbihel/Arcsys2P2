@@ -1,3 +1,5 @@
+/** @file */
+
 #include "game.h"
 
 static char *next_color_global_pointer;

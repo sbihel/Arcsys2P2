@@ -80,6 +80,11 @@ Dans un premier temps, on s'intéresse à l'ajout de spectateurs, puis on fait j
 
 \section{Ajout de spectateurs}
 
+Nous avons récupéré le code du jeu des 7 couleurs écrit par Simon Bihel et Corentin Ferry, qui était très bien documenté, et bien structuré. \\
+
+On va faire tourner le jeu sur un serveur, et ajouter la possibilité pour un client d'assister au match à distance.
+On utilise le port 7777 par défaut. \\
+
 
 Pour assister à un match en cours sur un serveur, on utilise la fonction \texttt{spectate()}. Cette fonction suit les différentes étapes suivantes :
 
@@ -134,8 +139,9 @@ cours de partie. \\
 qu'on envoie le coup qui vient d'être joué aux observateurs, on voit s'il y a
 une connexion en attente et si ce nouveau client veut regarder la partie. Si c'est le cas, alors 
 on l'ajoute au tableau des observateurs et on lui envoie l'état actuel du
-plateau.
+plateau. \\
 
+On peut ainsi avoir plusieurs spectateurs, qui peuvent arriver n'importe quand pendant le jeu. On effectue des tests en local avec l'adresse 127.0.0.1, en lançant plusieurs processus dans différents terminaux. On commente le code, et on génère la documentation avec \emph{Doxygen}.
 
 
 \section{Joueurs à distance}

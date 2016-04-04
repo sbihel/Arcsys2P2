@@ -1,3 +1,5 @@
+/** @file */
+
 #include "7colors.h"
 
 
