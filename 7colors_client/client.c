@@ -16,7 +16,7 @@
  */
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
-#define SERVER_IP "10.35.12.67"
+#define SERVER_IP "127.0.0.1"
 
 /* Exiting if server is not responding
  * after 2^(MAX_SERVER_MISS) - 1 seconds */

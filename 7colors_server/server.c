@@ -335,7 +335,7 @@ void remove_client(int index_client) {
  */
 void check_new_viewers(char *board, int board_size) {
   char message[BUFF_SIZE];
-  while(1) {
+  while(!viewers[NB_VIEWERS-1]) {
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(sfd, &readfds);
