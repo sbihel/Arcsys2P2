@@ -1,3 +1,5 @@
+/** @file */
+
 #include "ai.h"
 
 /** Choose a random color. */

@@ -1,4 +1,8 @@
+/** @file */
+
 #include "game.h"
+
+
 bool distant_player = false;
 
 double time_used[2];

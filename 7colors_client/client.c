@@ -1,3 +1,5 @@
+/** @file */
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -176,7 +178,7 @@ void send_play_request() {
       printf("Server refused your play request\n");
       printf("Redirecting you to spectating\n");
       spectate();
-      exit(0);
+      exit(0);p
     }
   } while (1);
   free(buffer);
