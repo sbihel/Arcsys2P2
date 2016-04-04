@@ -73,7 +73,16 @@ int check_messages(char *message, int message_size) {
         exit(2);
       }
       if (strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
-        potential_player = clients[i];
+        if(potential_player == 0) {
+          potential_player = clients[i];
+        } else {
+          int t = potential_player;
+          potential_player = clients[i];
+          reject_player();
+          potential_player = t;
+          viewers[current_nb_clients] = clients[i];
+          current_nb_viewers++;
+        }
       }
       if (strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
         viewers[current_nb_viewers] = clients[i];
@@ -339,13 +348,14 @@ void check_new_viewers(char *board, int board_size) {
       perror("Address");
       exit(1);
     }
-    
+
     if (recv(clientfd, message, BUFF_SIZE, 0) == -1) {
       perror("recv");
       exit(2);
     }
     printf("received %s\n", message);
     if(strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
+      potential_player = clientfd;
       reject_player(); /* Game already started */
     }
     if (strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
