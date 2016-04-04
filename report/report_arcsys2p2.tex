@@ -158,7 +158,14 @@ On souhaite avoir un client qui peut jouer au jeu à distance en se connectant a
 	\item Le client reçoit une demande de stratégie du serveur. Il choisit sa stratégie, et l'envoie au serveur.
 	\item Le serveur envoie ensuite le tableau initial du jeu, pour commencer à jouer.
 	\item Le serveur envoie au client l'information suivante : est-ce que le client joue en premier ou non ?
-	\item Le jeu tourne sur le serveur, et celui-ci envoie des requêtes de coup au client lorsque c'est nécessaire. Le client fait tourner en local un jeu afin de pouvoir calculer son coup suivant, et il l'envoie au serveur. \TODO
+	\item Le jeu tourne sur le serveur. Lorsque c'est au tour du joueur distant 
+	de jouer, le serveur attend automatiquement le coup du joueur. De son côté, 
+	le client fait tourner en local un jeu afin de pouvoir calculer son coup 
+	suivant, et il l'envoie au serveur.
+	%, et celui-ci envoie des requêtes de coup au client lorsque c'est 
+	%nécessaire. Le client fait tourner en local un jeu afin de pouvoir 
+	%calculer 
+	%son coup suivant, et il l'envoie au serveur. \TODO
 	\item Le serveur envoie au client les coups de l'adversaire, pour qu'il puisse mettre à jour sa version locale du jeu.
 \end{itemize}
 %
@@ -216,22 +223,54 @@ on tue le processus fils. Ensuite, si le coup a été calculé, on envoie le cou
 au serveur, sinon il est déjà trop tard et on attend de recevoir le coup qui a 
 été joué à notre place par le serveur.
 
+Concernant la chronométrage des deux joueurs, on prend le temps avant de 
+lancer/demander le coup suivant et on reprend le temps une fois qu'on a le 
+coup. La différence des deux donne le temps pris, et additionne au fil des 
+tours. On a utilisé des \texttt{struct timeval} et la fonction 
+\texttt{gettimeofday} pour avoir le temps écoulé depuis l'Epoch.
+
 
 
 \section{Critique}
 
-Pour une partie il faut avoir 2 threads (pour le serveur comme pour le joueur) 
-avec un qui gère les interactions serveur/client et un autre qui gère le jeu 
-(une sort d'automate). Le thread jeu dors et est réveillé des qu'un des 
-elements du jeu est changé. \\
+Actuellement, on est parti d'une version locale du jeu de 7colors en ajoutant
+des interactions serveur/client(s) dans le déroulement d'une partie. Cela peut
+encore marcher pour un serveur qui fait une seule partie d'un jeu simple.
+Cependant si le jeu avait besoin de plus d'interactions, une mauvais ordre dans
+les messages incapaciterait le client. Côté serveur il serait impossible de
+gérer plusieurs parties sans avoir des dépendances entre elles. Il faudrait donc
+séparer interactions réseaux et jeu. Il y aurait donc un thread dédié au réseau,
+et un thread par partie du jeu. Au final le déroulement d'une partie ne serait
+rien d'autre qu'un automate. Pour la gestion réseau on pourrait avoir une queue
+pour stocker un certain nombre de messages et les traiter dans un ordre
+approprié. On pourrait aussi avoir un thread en plus pour ne faire qu'écouter et
+mettre les messages dans la queue. Chaque partie aurait un identifiant et chaque
+message contiendrait un identifiant pour connaitre son rôle facilement. Il
+faudrait un moyen de définir quels messages sont attendus pour permettre à
+l'automate/thread de jeu de dormir et de ne le réveiller que lorsqu'un élément
+fait avancer la partie.
 
 
-On pourrait améliorer la robustesse de notre serveur en essayant de contrer des attaques par déni de service (DoS). On pourrait par exemple utiliser l'algorithme du CountMin Sketch que nous avons programmé lors d'un projet en module d'IRESI. \\
+Pour le joueur distant il faudrait attendre une demande du serveur pour choisir 
+une couleur avant de lancer les calculs et envoyer le coup effectué.
+
+On pourrait améliorer la robustesse de notre serveur en essayant de contrer des 
+attaques par déni de service (DoS). On pourrait par exemple utiliser 
+l'algorithme du CountMin Sketch que nous avons programmé lors d'un projet en 
+module d'IRESI.
 
 
 \section*{Conclusion}
 
-Nous avons donc programmer un serveur sur lequel tourne le jeu des 7 couleurs. Des clients ont la possibilité de se connecter au serveur, soit pour jouer, soit pour assister au match et le retransmettre. Pour l'instant, la possibilité de jouer à distance n'est offerte qu'à un seul joueur. On pourrait modifier le programme pour avoir deux joueurs distants. Par ailleurs, le programme est fonctionnel pour un round, on pourrait sans difficulté l'adapter pour un tournoi, en réinitialisant les joueurs distants et les spectateurs à chaque nouveau round. Enfin, on pourrai améliorer le protocole afin d'améliorer les performances et la robustesse du serveur.
+Nous avons donc programmé un serveur sur lequel tourne le jeu des 7 couleurs. 
+Des clients ont la possibilité de se connecter au serveur, soit pour jouer, 
+soit pour assister au match et le retransmettre. Pour l'instant, la possibilité 
+de jouer à distance n'est offerte qu'à un seul joueur. On pourrait modifier le 
+programme pour avoir deux joueurs distants. Par ailleurs, le programme est 
+fonctionnel pour un round, on pourrait sans difficulté l'adapter pour un 
+tournoi, en réinitialisant les joueurs distants et les spectateurs à chaque 
+nouveau round. Enfin, on pourrai améliorer le protocole afin d'améliorer les 
+performances et la robustesse du serveur.
 
 
 \bibliographystyle{plain} 
