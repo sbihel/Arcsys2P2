@@ -335,50 +335,53 @@ void remove_client(int index_client) {
  */
 void check_new_viewers(char *board, int board_size) {
   char message[BUFF_SIZE];
-  fd_set readfds;
-  FD_ZERO(&readfds);
-  FD_SET(sfd, &readfds);
-  struct timeval tv;
-  tv.tv_sec = 0;
-  tv.tv_usec = 0;
-  if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
-    perror("select");
-    exit(1);
-  }
-  if(FD_ISSET(sfd, &readfds)) {
-    struct sockaddr_in client_addr;
-    memset(&client_addr, '0', sizeof (struct sockaddr_in));
-    int clientfd;
-    socklen_t client_addr_len = sizeof(struct sockaddr_in);
-    clientfd = accept(sfd, (struct sockaddr *) &client_addr,
-                      &client_addr_len);
-
-    if (clientfd == -1) {
-      perror("Accept");
+  while(1) {
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(sfd, &readfds);
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    if (select(sfd+1, &readfds, NULL, NULL, &tv) < 0) {
+      perror("select");
       exit(1);
     }
+    if(FD_ISSET(sfd, &readfds)) {
+      struct sockaddr_in client_addr;
+      memset(&client_addr, '0', sizeof (struct sockaddr_in));
+      int clientfd;
+      socklen_t client_addr_len = sizeof(struct sockaddr_in);
+      clientfd = accept(sfd, (struct sockaddr *) &client_addr,
+          &client_addr_len);
 
-    char client_addr_str[INET_ADDRSTRLEN];
-    if (!inet_ntop(AF_INET, &client_addr, client_addr_str, INET_ADDRSTRLEN)) {
-      perror("Address");
-      exit(1);
-    }
+      if (clientfd == -1) {
+        perror("Accept");
+        exit(1);
+      }
 
-    if (recv(clientfd, message, BUFF_SIZE, 0) == -1) {
-      perror("recv");
-      exit(2);
-    }
-    printf("received %s\n", message);
-    if(strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
-      potential_player = clientfd;
-      reject_player(); /* Game already started */
-    }
-    if (strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
-      viewers[current_nb_viewers] = clientfd;
-      init_viewer(board, board_size, current_nb_viewers);
-      current_nb_viewers++;
-    }
+      char client_addr_str[INET_ADDRSTRLEN];
+      if (!inet_ntop(AF_INET, &client_addr, client_addr_str, INET_ADDRSTRLEN)) {
+        perror("Address");
+        exit(1);
+      }
 
+      if (recv(clientfd, message, BUFF_SIZE, 0) == -1) {
+        perror("recv");
+        exit(2);
+      }
+      printf("received %s\n", message);
+      if(strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
+        potential_player = clientfd;
+        reject_player(); /* Game already started */
+      }
+      if (strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
+        viewers[current_nb_viewers] = clientfd;
+        init_viewer(board, board_size, current_nb_viewers);
+        current_nb_viewers++;
+      }
+    } else {
+      break;
+    }
   }
 }
 
