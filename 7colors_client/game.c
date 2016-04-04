@@ -106,7 +106,7 @@ char* ask_game_type_client()
 
 /** The main game function, that runs a single game.
  * @param board An initialized board, as given by the server
- * received spectating request
+ *              received spectating request
  */
 char game_spectate(char* board)
 {

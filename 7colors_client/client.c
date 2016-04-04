@@ -22,7 +22,11 @@
  * after 2^(MAX_SERVER_MISS) - 1 seconds */
 #define MAX_SERVER_MISS 3
 
+/* MOVE_REQUEST not used, could be used in an extension to
+ * improve playing protocol
+ */
 #define MOVE_REQUEST "ceciestunerequetedemove"
+
 #define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
 #define PLAY_REQUEST "iwannaplaydude"
 #define SPECTATE_REQUEST "iwannaspectateman"
@@ -164,7 +168,7 @@ char* send_game_type_client() {
 
 /** Send a play request to server
  * If accepted, server will ask for game_type and move then
- * If refused (because already two players for example), then exit
+ * If refused (because already two players for example), then spectate
  */
 void send_play_request() {
   char* buffer = (char*) malloc (BUFF_SIZE*sizeof(char));

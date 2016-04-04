@@ -30,7 +30,11 @@ int current_nb_viewers = 0;
 int player_socket;
 int potential_player;
 
+/* MOVE_REQUEST not used, could be used in an extension to
+ * improve playing protocol
+ */
 #define MOVE_REQUEST "ceciestunerequetedemove"
+
 #define PLAYER_REQUEST "ceciestunerequetedestrategiepourlejoueur"
 #define PLAY_REQUEST "iwannaplaydude"
 #define SPECTATE_REQUEST "iwannaspectateman"
