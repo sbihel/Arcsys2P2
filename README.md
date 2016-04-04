@@ -18,4 +18,4 @@ Usage:
 	
 	Client:
 	To play:		$ ./7colors -p 
-	To spectate: 	$.7colors -s
+	To spectate: 	$ ./7colors -s
