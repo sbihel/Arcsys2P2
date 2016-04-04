@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <stdbool.h>
 
+#include "server.h"
+
 #define BUFF_SIZE 1024
 #define PORT_NB "7777"
 #define NB_VIEWERS 999
@@ -66,14 +68,14 @@ int check_messages(char *message, int message_size) {
   }
   for(int i = 0; i < current_nb_clients; i++) {
     if(FD_ISSET(clients[i], &readfds)) {
-      if(recv(clients[i], message, message_size, 0) == -1) {
+      if (recv(clients[i], message, message_size, 0) == -1) {
         perror("recv");
         exit(2);
       }
-      if(strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
+      if (strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
         potential_player = clients[i];
       }
-      if(strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
+      if (strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
         viewers[current_nb_viewers] = clients[i];
         current_nb_viewers++;
       }
@@ -308,6 +310,7 @@ void remove_viewer(int index_viewer) {
  * @param board_size: Length of a side of the board.
  */
 void check_new_viewers(char *board, int board_size) {
+  char message[BUFF_SIZE];
   fd_set readfds;
   FD_ZERO(&readfds);
   FD_SET(sfd, &readfds);
@@ -336,10 +339,21 @@ void check_new_viewers(char *board, int board_size) {
       perror("Address");
       exit(1);
     }
+    
+    if (recv(clientfd, message, BUFF_SIZE, 0) == -1) {
+      perror("recv");
+      exit(2);
+    }
+    printf("received %s\n", message);
+    if(strncmp(message, PLAY_REQUEST, sizeof(PLAY_REQUEST)) == 0) {
+      reject_player(); /* Game already started */
+    }
+    if (strncmp(message, SPECTATE_REQUEST, sizeof(SPECTATE_REQUEST)) == 0) {
+      viewers[current_nb_viewers] = clientfd;
+      init_viewer(board, board_size, current_nb_viewers);
+      current_nb_viewers++;
+    }
 
-    viewers[current_nb_viewers] = clientfd;
-    init_viewer(board, board_size, current_nb_viewers);
-    current_nb_viewers++;
   }
 }
 

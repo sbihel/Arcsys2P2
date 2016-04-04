@@ -176,6 +176,7 @@ void send_play_request() {
       printf("Server refused your play request\n");
       printf("Redirecting you to spectating\n");
       spectate();
+      exit(0);
     }
   } while (1);
   free(buffer);
