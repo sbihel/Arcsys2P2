@@ -192,7 +192,12 @@ programme en expliquant que le serveur semble être déconnecté. On effectue
 ainsi \texttt{MAX\_SERVER\_MISS} demandes au serveur, espacées d'un temps qui 
 augmente exponentiellement. Concrètement, cela signifie que si l'on a pas 
 réussi à avoir de connexion avec le serveur au bout de 
-$2^{\texttt{MAX\_SERVER\_MISS}} - 1$ secondes, alors on le considère déconnecté.
+$2^{\texttt{MAX\_SERVER\_MISS}} - 1$ secondes, alors on le considère déconnecté. \\
+
+Pour tester la robustesse de notre programme, nous avons effectué des tests en local sur une unique machine,
+et également des tests sur trois machines en même temps (nous remercions Louis Béziaud pour sa participation aux essais)
+sur lesquels ont tourné en même temps un serveur, un joueur distant et une centaine de spectateurs.
+Les résultats nous ont permis d'affiner la robustesse, jusqu'à arriver à des résultats satisfaisants.
 
 
 \subsection{Limite de temps}
@@ -200,9 +205,6 @@ $2^{\texttt{MAX\_SERVER\_MISS}} - 1$ secondes, alors on le considère déconnect
 Calcul du prochain coups dans un precessus fils, au bout d'un certain temps on 
 le tue et on voit si il a réussi a calculé le coup, sinon c'est deja trop tard 
 et on attend le coup joué par le serveur à notre place.
-
-
-\section{Contraintes imposées par le serveur}
 
 
 
@@ -219,7 +221,7 @@ On pourrait améliorer la robustesse de notre serveur en essayant de contrer des
 
 \section*{Conclusion}
 
-\TODO
+Nous avons donc programmer un serveur sur lequel tourne le jeu des 7 couleurs. Des clients ont la possibilité de se connecter au serveur, soit pour jouer, soit pour assister au match et le retransmettre. Pour l'instant, la possibilité de jouer à distance n'est offerte qu'à un seul joueur. On pourrait modifier le programme pour avoir deux joueurs distants. Par ailleurs, le programme est fonctionnel pour un round, on pourrait sans difficulté l'adapter pour un tournoi, en réinitialisant les joueurs distants et les spectateurs à chaque nouveau round. Enfin, on pourrai améliorer le protocole afin d'améliorer les performances et la robustesse du serveur.
 
 
 \bibliographystyle{plain} 
